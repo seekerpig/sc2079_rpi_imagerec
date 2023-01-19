@@ -1,6 +1,17 @@
 # sc2079_rpi_imagerec
 Github repository for SC2079 RPI and Image Rec - Group 06
 
+##TODOS:
+- We need to figure out what kind of messages each team will send to each other
+- We need to define how those messages should look like. 
+- Figure out camera height versus obstacle height, then start taking photos
+
+
+Example:    {
+                'target': target, (e.g. "ALGO")
+                'payload': message,
+            }
+
 
 # RPI:
 ## Multithreading:
@@ -23,4 +34,5 @@ The 4 queues are: toAndroidQueue, toAlgoQueue, toImgQueue, toSTMQueue
 
 E.g. We receive message from android and realised the message is for ALGO, so we just push the message into ALGO's queue
 Since all processes run at the same time, process (5) will see that the ALGO queue is not empty, and then send the message to ALGO.
+
 
