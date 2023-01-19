@@ -1,5 +1,5 @@
 #This is for sending and receiving image from RPI
-import Server
+from server import *
 
 def init():
     print("Initialising image recognition....")
