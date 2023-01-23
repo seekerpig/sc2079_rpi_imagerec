@@ -36,3 +36,47 @@ E.g. We receive message from android and realised the message is for ALGO, so we
 Since all processes run at the same time, process (5) will see that the ALGO queue is not empty, and then send the message to ALGO.
 
 
+
+# below messages excludes like the statuses such as checking when STM32, ImageRec etc... are ready.
+# below are only for task 1 image rec, task 2 movement that include sensors etc are not included for now..
+
+# Android
+## Types of messages from Android
+1. Android to Algo (obstacles and start message) - these messages might be seperate to allow time for calculation?
+2. Android to STM (manually move)
+3. Android to RPI (take picture?) then RPI take picture and send to Image Rec for processing.
+
+
+## Functions for Android.py (via bluetooth)
+1. __init__
+2. connect
+3. disconnect
+4. send
+5. receive
+
+# Algo
+## Types of messages from Algo
+1. Algo to STM (movements for robot to take) e.g. STM, FW10, FR00, FW20, BL20... etc
+2. Algo to Android (paths? like coordinates of robot so algo can simulate the run)
+
+
+## Functions for Algo.py (via socket?)
+1. __init__
+2. connect
+3. disconnect
+4. send
+5. receive
+
+# STM32
+## Types of messages from STM32
+1. Reach designed location, ask RPI to take picture? Then RPI take pic and send to Image Rec to process before sending to Android the identified obstacle ID. (im not sure how this works)
+2. Send message to say task completed
+
+
+
+## Functions for STM32.py (via UART)
+1. __init__
+2. connect
+3. disconnect
+4. send
+5. receive
