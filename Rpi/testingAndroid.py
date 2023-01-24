@@ -88,7 +88,7 @@ class MultiProcess:
                     print("Checking receiveFromAndroid process work... rawMessage = ", rawMessage)
 
                     #testing only - add message to androidQueue to see if it sends to android a not.
-                    self.toAndroidQueue.put_nowait("Hello World")
+                    #self.toAndroidQueue.put_nowait("Hello World")
                     pass
 
                 

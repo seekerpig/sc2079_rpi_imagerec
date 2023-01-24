@@ -86,8 +86,11 @@ class MultiProcess:
                 rawMessage = self.Android.receive()
                 
                 if(rawMessage):
-                    print("Checking receiveFromAndroid process work... rawMessage = ", rawMessage)
                     #TODO need to implement code to check below for who message is for and then do the message process
+                    print("Checking receiveFromAndroid process work... rawMessage = ", rawMessage)
+
+                    #testing only - add message to androidQueue to see if it sends to android a not.
+                    #self.toAndroidQueue.put_nowait("Hello World")
                     pass
 
                 
@@ -99,7 +102,7 @@ class MultiProcess:
             try:
                 if not self.toAndroidQueue.empty():
                     message = self.toAndroidQueue.get_nowait()
-                    self.android.send(message)
+                    self.Android.send(message)
                 
             except Exception as error:
                 print("Send to android error:", error)
