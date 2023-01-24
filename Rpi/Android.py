@@ -57,12 +57,19 @@ class Android:
             print("Failed to disconnect client socket...")
 
     
-    def send(self):
+    def send(self, message):
         #sending message
-        print("sending message to Android")
+        print("Sending message to Android")
+        try:
+            self.client_sock.send(message.encode("utf-8"))
+        
+        except Exception as error:
+            print("Error sending message to android: ". error)
 
     def receive(self):
         #sending message
         print("receiving message from Android")
-        self.data = self.client_sock.recv(1024)
-        print("received [%s]" % self.data)
+        self.data = self.client_sock.recv(1024).decode("utf-8")
+        self.data = self.data.strip()
+
+        print("received data:", self.data)
