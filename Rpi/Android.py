@@ -28,7 +28,7 @@ class Android:
 
     def connect(self):
         #perform connection
-        print("Connecting Android.. waiting for bluetooth connection on RFCOMM {self.port}..")
+        print(f"Connecting Android.. waiting for bluetooth connection on RFCOMM {self.port}..")
         retry = True
         while retry:
             try:
@@ -36,11 +36,14 @@ class Android:
                     self.client_sock,self.address = self.server_sock.accept()
                     print("Accepted connection from ",self.address)
                     retry = False
+
             except Exception as error:
                 print("Failed to connect to establish bluetooth connection with Android, retrying...")
                 retry = True
-                self.client_sock.close()
-                self.client_sock = None
+
+                if(self.client_sock != None):
+                    self.client_sock.close()
+                    self.client_sock = None
 
         
     
