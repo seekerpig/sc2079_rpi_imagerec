@@ -1,7 +1,7 @@
 import time
 import serial
-from misc.protocols import STM_PROTOCOL
-from misc.config import SERIAL_PORT, BAUD_RATE
+import STM_PROTOCOL
+import SERIAL_PORT, BAUD_RATE
 
 class STM:
     def __init__(self, serial_port=SERIAL_PORT, baud_rate=BAUD_RATE) -> None:
