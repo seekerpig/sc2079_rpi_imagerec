@@ -42,6 +42,7 @@ class Android:
                 retry = True
 
                 if(self.client_sock != None):
+                    print("Client socket not none, closing socket for retry")
                     self.client_sock.close()
                     self.client_sock = None
 
