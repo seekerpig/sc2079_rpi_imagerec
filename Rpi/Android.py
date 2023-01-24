@@ -30,6 +30,7 @@ class Android:
         #perform connection
         print(f"Connecting Android.. waiting for bluetooth connection on RFCOMM {self.port}..")
         retry = True
+        self.client_sock = None
         while retry:
             try:
                 if self.client_sock == None:
