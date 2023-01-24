@@ -47,7 +47,7 @@ class Android:
                     self.client_sock.close()
                     self.client_sock = None
 
-        
+        self.client_sock.send("testing this message".encode("utf-8"))
     
     def disconnect(self):
         #disconnect
@@ -76,6 +76,6 @@ class Android:
         print("receiving message from Android")
         self.data = self.client_sock.recv(1024).decode("utf-8")
         self.data = self.data.strip()
-        print("received data:", self.data)
+        #print("received data:", self.data)
 
         return self.data

@@ -85,6 +85,7 @@ class MultiProcess:
                 
                 if(rawMessage):
                     #TODO need to implement code to check below for who message is for and then do the message process
+                    print("Checking receiveFromAndroid process work... rawMessage = ", rawMessage)
                     pass
 
                 
