@@ -42,20 +42,41 @@ class MultiProcess:
     def start(self):
         #this function would try to establish all the connections
         try:
+            print("Starting connections..")
             self.Android.connect()
             self.Algo.connect()
             self.STM32.connect()
-
             #I think imageRec no need connect? not sure
             #self.ImageRec.connect()
+            print("Connections successful.")
+
+
+            #after connection, start all the processes to begin running
+            print("Starting processes..")
+            self.receiveFromAndroidProcess.start()
+            self.sendToAndroidProcess.start()
+            self.receiveFromAlgoProcess.start()
+            self.sendToAlgoProcess.start()
+            self.receiveFromSTMProcess.start()
+            self.sendToSTMProcess.start()
+            self.sendToImageRecProcess.start()
+            print("Processes started.")
+
         except Exception as error:
             print("Error when starting multiprocess.start connections: ", error)
+
+        
+        self.checkProcesses()
     
     def receiveFromAndroid(self):
         while True:
             try:
-                #
-                pass
+                rawMessage = self.Android.receive()
+
+                if(rawMessage):
+                    pass
+
+                
             except Exception as error:
                 print(error)
                 raise error
@@ -112,3 +133,14 @@ class MultiProcess:
             except Exception as error:
                 print(error)
                 raise error
+
+    
+    def checkProcesses(self):
+        #this is a while loop on the main thread.
+        while True:
+            try:
+                #Type some code below here to check whether the connections are live?
+                #if not live, must reconnect?
+                pass
+            except Exception as error:
+                print("checkProcesses error: ", error)
