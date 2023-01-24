@@ -100,7 +100,7 @@ class MultiProcess:
             try:
                 if not self.toAndroidQueue.empty():
                     message = self.toAndroidQueue.get_nowait()
-                    self.android.send(message)
+                    self.Android.send(message)
                 
             except Exception as error:
                 print("Send to android error:", error)
