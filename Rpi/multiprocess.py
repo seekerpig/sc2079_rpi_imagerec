@@ -86,20 +86,23 @@ class MultiProcess:
                 rawMessage = self.Android.receive()
                 
                 if(rawMessage):
+                    #TODO need to implement code to check below for who message is for and then do the message process
                     pass
 
                 
             except Exception as error:
-                print(error)
-                raise error
+                print("Receive from android error:", error)
     
     def sendToAndroid(self):
         while True:
             try:
-                pass
+                if not self.toAndroidQueue.empty():
+                    message = self.toAndroidQueue.get_nowait()
+                    self.android.send(message)
+                
             except Exception as error:
-                print(error)
-                raise error
+                print("Send to android error:", error)
+                
 
     
 
