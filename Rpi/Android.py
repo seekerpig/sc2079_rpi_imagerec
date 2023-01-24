@@ -64,7 +64,8 @@ class Android:
     
     def send(self, message):
         #sending message
-        print("Sending message to Android")
+        print("")
+        print("Sending message to Android..")
         try:
             self.client_sock.send(message.encode("utf-8"))
         
@@ -73,6 +74,7 @@ class Android:
 
     def receive(self):
         #sending message
+        print("")
         print("receiving message from Android")
         self.data = self.client_sock.recv(1024).decode("utf-8")
         self.data = self.data.strip()
