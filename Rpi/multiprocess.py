@@ -68,11 +68,23 @@ class MultiProcess:
         
         self.checkProcesses()
     
+    def end(self):
+        if self.Android is not None:
+            self.Android.disconnect()
+        
+        if self.Algo is not None:
+            self.Algo.disconnect()
+        
+        if self.STM32 is not None:
+            self.STM32.disconnect()
+        
+        print("Multiprocessing has stopped.. All connections are disconnected.")
+
     def receiveFromAndroid(self):
         while True:
             try:
                 rawMessage = self.Android.receive()
-
+                
                 if(rawMessage):
                     pass
 
