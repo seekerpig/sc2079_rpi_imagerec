@@ -113,19 +113,30 @@ class MultiProcess:
     def receiveFromAlgo(self):
         while True:
             try:
-                pass
+                rawMessage = self.Algo.receive()
+                
+                if(rawMessage):
+                    #TODO need to implement code to check below for who message is for and then do the message process
+                    print("Checking receiveFromAlgo process work... rawMessage = ", rawMessage)
+
+                    #testing only - add message to androidQueue to see if it sends to android a not.
+                    #self.toAndroidQueue.put_nowait("Hello World")
+                    pass
+
+                
             except Exception as error:
-                print(error)
-                raise error
+                print("Receive from algo error:", error)
 
 
     def sendToAlgo(self):
         while True:
             try:
-                pass
+                if not self.toAlgoQueue.empty():
+                    message = self.toAlgoQueue.get_nowait()
+                    self.Algo.send(message)
+                
             except Exception as error:
-                print(error)
-                raise error
+                print("Send to algo error:", error)
 
     
     def receiveFromSTM(self):
