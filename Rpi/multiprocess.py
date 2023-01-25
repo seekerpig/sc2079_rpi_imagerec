@@ -142,17 +142,29 @@ class MultiProcess:
     def receiveFromSTM(self):
         while True:
             try:
-                pass
+                raw massage = self.STM32.recv()
+                
+                if raw_message is None:
+                    continue
+                
+                if raw_message == # message_we_set_for_stm
+                        print("Message received from STM!")
+                    else:
+                        print("Message does not match!")
+
             except Exception as error:
-                print(error)
-                raise error
+                    print("STM Read Error:", error)
+
+                
     def sendToSTM(self):
         while True:
             try:
-                pass
+                if not self.toSTMQueue.empty():
+                    message = self.toSTMQueue.get_nowait()
+                    self.STM32.send(message)
+                
             except Exception as error:
-                print(error)
-                raise error
+                 print('Process sendToSTM has failed:', error)
     
 
     #you expect to get the message back from imageRec when sending, so no receive function
