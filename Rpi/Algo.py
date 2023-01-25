@@ -2,7 +2,7 @@
 import socket
 
 
-IP_ADDR = "192.168.6.6""
+IP_ADDR = "192.168.6.6"
 PORT = "5050"
 
 
