@@ -1,4 +1,5 @@
-
+#socket for communication
+import socket
 
 
 class Algo:
