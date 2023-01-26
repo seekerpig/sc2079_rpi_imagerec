@@ -139,17 +139,26 @@ class MultiProcess:
                 print("Send to algo error:", error)
 
     
-    def receiveFromSTM(self):
+     def receiveFromSTM(self):
         while True:
             try:
-                raw massage = self.STM32.recv()
+                raw_massage = self.STM32.recv()
                 
                 if raw_message is None:
                     continue
+                #Manual,FW,FW,Fl,FR,BW
+                message = raw_messag.split(COMMA_SEPARATOR)
                 
-                if raw_message == # message_we_set_for_stm
-                        print("Message received from STM!")
-                    else:
+                if message[0] == STM_status.COMPLETED: # task completed
+                    
+                        print("Message received from STM!",message)
+                        
+                elif message[0] == STM_status.REACH:   # Reach location, ask RPI to take snap picture 
+                    
+                        print("Message received from STM!",message)
+                        
+                        self.toImageQueue.put_nowait(SNAP + raw_message )
+                else:
                         print("Message does not match!")
 
             except Exception as error:
@@ -165,7 +174,6 @@ class MultiProcess:
                 
             except Exception as error:
                  print('Process sendToSTM has failed:', error)
-    
 
     #you expect to get the message back from imageRec when sending, so no receive function
     def sendToImageRec(self):
