@@ -146,7 +146,7 @@ class MultiProcess:
                 
                 if raw_message is None:
                     continue
-                #Manual,FW,FW,Fl,FR,BW
+                #Completed or REACH,FW,FW,Fl,FR,BW
                 message = raw_messag.split(COMMA_SEPARATOR)
                 
                 if message[0] == STM_status.COMPLETED: # task completed
