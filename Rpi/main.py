@@ -3,7 +3,8 @@
 
 
 #testing android code
-from testingAndroid import MultiProcess
+#from testingAndroid import MultiProcess
+from testingAlgoAndAndroid import MultiProcess
 
 def init():
     print("Starting up group 6 rpi")
