@@ -20,11 +20,14 @@ class STM_status:
   REACH = 'REACH,'.encode()
 
 #Android to Algo
+#OBSTACLE message = "ALG,OBSTACLE,
 class AndtoAlgo:
   OBSTACLE = "OBSTACLE".encode()
   START = 'START,'.encode()
   
 #Android to STM
+#MANUAL MESSAGE should look like this: STM,MANUAL,FW10
+ 
 class AndToSTM:
   MANUAL = 'MANUAL,'.encode()
 
@@ -35,6 +38,7 @@ class AndTORPI:
   START = 'START,'.encode()
 
 #Algo to STM
+#MOVEMENTS MESSAGE should look like this: "STM,MOVEMENTS,["FW10","FR00","FW50","SNAP","FIN"]"
 class AlgoToSTM:
   path ='path,'.encode() #??
 
