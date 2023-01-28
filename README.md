@@ -5,7 +5,8 @@ Github repository for SC2079 RPI and Image Rec - Group 06
 - We need to figure out what kind of messages each team will send to each other
 - We need to define how those messages should look like. 
 - Figure out camera height versus obstacle height, then start taking photos
-
+- We need a function to clear queues
+- What about outdoorsify?
 
 ##TODOS for 28/1/2023
 What do we need to test for STM?
@@ -22,6 +23,7 @@ Afterwards send a message to the team and tell them all the possible messages an
 Example:    {
                 'target': target, (e.g. "ALGO")
                 'payload': message,
+                
             }
 
 

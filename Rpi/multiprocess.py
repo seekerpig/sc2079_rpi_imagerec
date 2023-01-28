@@ -22,6 +22,9 @@ class MultiProcess:
         self.Algo = Algo()
         self.ImageRec =  ImageClient()
         
+        #creating some movement and event locks
+        self.movement_lock = manager.Lock()
+        self.unpause = Manager.Event()
 
         #creating message queues for each of the relevant process
         self.toAndroidQueue = Queue()

@@ -1,5 +1,7 @@
 import imagezmq
 import cv2
+#pip install imagezmq
+#pip install opencv-python
 
 class Server:
     def __init__(self):
@@ -13,6 +15,7 @@ class Server:
                 print("Waiting for image to be received....")
                 sender, img = self.image_receiver.recv_image()
                 print(f'Received image from {sender}')
+
                 cv2.imshow(sender, img)
                 cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1)
                 self.image_receiver.send_reply(b'OK')
