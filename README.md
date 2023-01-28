@@ -7,6 +7,18 @@ Github repository for SC2079 RPI and Image Rec - Group 06
 - Figure out camera height versus obstacle height, then start taking photos
 
 
+##TODOS for 28/1/2023
+What do we need to test for STM?
+- Movement accuracy for FWXX, BWXX, FR00, FL00, BR00, BL00 
+- We also need to test SNAP and FIN (so when STM finishes executing a sequence of strings and reach "SNAP", STM should send a message back to us,
+then we take picture, once successful picture taken, we will send a message to STM saying continue the path)
+- Therefore, its important that we can test a sequence of strings also
+- In order to test this, we need scotch tape and ruler
+
+We should finish defining all the protocols and how message look like and also start implementing into the multiprocessing code in terms of checking.
+Afterwards send a message to the team and tell them all the possible messages and what are the text we're expecting to standardise.
+
+
 Example:    {
                 'target': target, (e.g. "ALGO")
                 'payload': message,
@@ -37,8 +49,8 @@ Since all processes run at the same time, process (5) will see that the ALGO que
 
 
 
-# below messages excludes like the statuses such as checking when STM32, ImageRec etc... are ready.
-# below are only for task 1 image rec, task 2 movement that include sensors etc are not included for now..
+below messages excludes like the statuses such as checking when STM32, ImageRec etc... are ready.
+below are only for task 1 image rec, task 2 movement that include sensors etc are not included for now..
 
 # Android
 ## Types of messages from Android
