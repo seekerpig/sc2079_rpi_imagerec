@@ -6,7 +6,7 @@ from Android import Android
 from STM32 import STM32
 from Algo import Algo
 from imageClient import ImageClient
-
+import Protocol
 
 
 
@@ -91,10 +91,41 @@ class MultiProcess:
                 if(rawMessage):
                     #TODO need to implement code to check below for who message is for and then do the message process
                     print("Checking receiveFromAndroid process work... rawMessage = ", rawMessage)
+                    
+                    if rawMessage.startwith(Protocol.Android.TASK1):
+                        #If message is for doing task 1, the message should consist of two parts, header and obstacle coordinates
+                        # "TASK1|[{x:6,y:2,d:4}, {x:4,y:2,d:0}, {x:5,y:2,d:2}]" THE COORDINATE REPRESENTS OBSTACLE HERE
+
+                        messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
+                        if (len(messageList) > 1):
+                            self.toAlgoQueue.put_nowait(rawMessage)
+                            self.unpause.set()
+                        else:
+                            print("Message is from android for task 1 is not complete, hence not processed.")
+                        
+
+                    elif rawMessage.startwith(Protocol.Android.TASK2):
+                        #TODO task 2 for the project
+                        self.unpause.set()
+                        pass
+
+                    elif rawMessage.startwith(Protocol.Android.MANUAL):
+                        #If message is for MANUAL movement, the message should consist of two parts, header and command
+                        # "MANUAL|FR00"
+
+                        messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
+                        if (len(messageList) > 1):
+                            self.toSTMQueue.put_nowait(messageList[1])
+                            self.unpause.set()
+                        else:
+                            print("Message is from android for MANUAL is not complete, hence not processed.")
+
+                    else:
+                        print("Raw message is not recognised from Android")
 
                     #testing only - add message to androidQueue to see if it sends to android a not.
                     #self.toAndroidQueue.put_nowait("Hello World")
-                    pass
+                    
 
                 
             except Exception as error:
@@ -142,7 +173,7 @@ class MultiProcess:
                 print("Send to algo error:", error)
 
     
-     def receiveFromSTM(self):
+    def receiveFromSTM(self):
         while True:
             try:
                 raw_massage = self.STM32.recv()
@@ -171,6 +202,7 @@ class MultiProcess:
     def sendToSTM(self):
         while True:
             try:
+                #NEED TO ADD MOVEMENT LOCKS AND UNPAUSE CHECKS
                 if not self.toSTMQueue.empty():
                     message = self.toSTMQueue.get_nowait()
                     self.STM32.send(message)
@@ -197,3 +229,26 @@ class MultiProcess:
                 pass
             except Exception as error:
                 print("checkProcesses error: ", error)
+
+    def clear_queues(self):
+        while not self.toAndroidQueue.empty():
+            self.toAndroidQueue.get()
+        while not self.toAlgoQueue.empty():
+            self.toAlgoQueue.get()
+        while not self.toSTMQueue.empty():
+            self.toSTMQueue.get()
+        while not self.toAndroidQueue.empty():
+            self.toImageQueue.get()
+
+    @staticmethod
+    def outdoorsify(original):
+        # replace any turns calibrated indoor to outdoor calibrated turns.
+        # replace any FW and BW to FS and BS, this is to indicate the outdoor calibrated forward and backward movements.
+        if original in ["FL00", "FR00", "BL00", "BR00"]:
+            return original[:2] + "20"
+        elif original.startswith("FW"):
+            return original.replace("FW", "FS")
+        elif original.startswith("BW"):
+            return original.replace("BW", "BS")
+        else:
+            return original

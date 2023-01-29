@@ -3,24 +3,27 @@
 
 
 
-COMMA_SEPARATOR = "|".encode()
+MSG_SEPARATOR = "|"
 
-
+#HERE ARE MESSAGES FROM ANDROID:
 class Android:
-  #HERE ARE MESSAGES FROM ANDROID:
-  MANUAL = "MANUAL".encode()
+  #Examples of possible messages for manual:
+  # "MANUAL|FW10" 
+  # "MANUAL|FR00"
+  MANUAL = "MANUAL"
+  #Examples of possible messages for TASK1:
   # "TASK1|[{x:6,y:2,d:4}, {x:4,y:2,d:0}, {x:5,y:2,d:2}]" THE COORDINATE REPRESENTS OBSTACLE HERE
-  TASK1 = "TASK1".encode()
-  TASK2 = "TASK2".encode()  
+  TASK1 = "TASK1"
+  TASK2 = "TASK2" 
 
+#HERE ARE MESSAGES FROM ALGO:
 class Algo:
-  #HERE ARE MESSAGES FROM ALGO:
   # "TASK1|[FW10, FR00, FW70, BR00, BW20, SNAP, FW20, FIN]|[{x:1,y:1,d:0}, {x:4,y:2,d:2}, {x:5,y:2,d:2}]" THE COORDINATE REPRESENTS WHERE THE ROBOT WILL BE AT (NOT OBSTACLE)
-  TASK1 = "TASK1".encode()
-  TASK2 = "TASK2".encode()
+  TASK1 = "TASK1"
+  TASK2 = "TASK2"
 
 class STM:
-  ACK = "ACK".encode()
+  ACK = "ACK"
   
 
 
