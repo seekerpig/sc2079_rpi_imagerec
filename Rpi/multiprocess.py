@@ -15,6 +15,8 @@ class MultiProcess:
     def __init__(self):
         print("Starting multi processing __init__ function")
         self.manager = Manager()
+        #initialising the modes. mode = 0 (manual) mode = 1 (path)
+        self.mode = 0 
 
         #initialising all the classes first
         self.Android = Android()
@@ -98,6 +100,7 @@ class MultiProcess:
 
                         messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
                         if (len(messageList) > 1):
+                            self.mode = 1 
                             self.toAlgoQueue.put_nowait(rawMessage)
                             self.unpause.set()
                         else:
@@ -115,6 +118,7 @@ class MultiProcess:
 
                         messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
                         if (len(messageList) > 1):
+                            self.mode = 0 
                             self.toSTMQueue.put_nowait(messageList[1])
                             self.unpause.set()
                         else:
@@ -147,15 +151,32 @@ class MultiProcess:
     def receiveFromAlgo(self):
         while True:
             try:
-                rawMessage = self.Algo.receive()
-                
-                if(rawMessage):
+                 rawMessage = self.Algo.receive()
+                 if rawMessage is None:
+                     continue
+
+                 if rawMessage.startswith(Protocol.Algo.TASK1): 
+                     # self.mode = 1
+                     messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
+
+                     if (len(messageList) == 3):
+                             #Sending the message from the list individually to the queue
+                             #example, FW10 , FW00 etc... 
+                             # change to loop !
+                             self.toSTMQueue.put_nowait(messageList[1].split(Protocol.MSG_COMM))
+
+                             #Sending the Robot coordinates to Android
+                             if self.mode == 1: 
+                                self.toAndroidQueue.put_nowait(messageList[2])
+                                self.unpause.set()
+
+                #if(rawMessage):
                     #TODO need to implement code to check below for who message is for and then do the message process
-                    print("Checking receiveFromAlgo process work... rawMessage = ", rawMessage)
+                   # print("Checking receiveFromAlgo process work... rawMessage = ", rawMessage)
 
                     #testing only - add message to androidQueue to see if it sends to android a not.
                     #self.toAndroidQueue.put_nowait("Hello World")
-                    pass
+                   # pass
 
                 
             except Exception as error:
@@ -175,26 +196,26 @@ class MultiProcess:
     
     def receiveFromSTM(self):
         while True:
-            try:
-                raw_massage = self.STM32.recv()
+            raw_massage = self.STM32.recv()
                 
-                if raw_message is None:
+            if raw_massage is None:
                     continue
-                #Completed or REACH,FW,FW,Fl,FR,BW
-                message = raw_message.split(COMMA_SEPARATOR)
-                
-                if message[0] == STM_status.COMPLETED: # task completed
+            try: 
+                if raw_massage.startswith("ACK"): 
+                 
+                    self.movement_lock.release()
+                    print("ACK received, Movement lock releasing . . .")
                     
-                        print("Message received from STM!",message)
-                        
-                elif message[0] == STM_status.REACH:   # Reach location, ask RPI to take snap picture 
-                    
-                        print("Message received from STM!",message)
-                        
-                        self.toImageQueue.put_nowait(SNAP + raw_message )
-                else:
-                        print("Message does not match!")
+                    #I think we should use a mode = 1 to determine if its path or manual here. 
+                    #to update the android the position of the robot live
+                    if self.mode==1: 
+                       self.toAndroidQueue.put_nowait("NEXT") 
 
+                if raw_massage.startswith("FAILED"):
+                    self.movement_lock.release()
+                    self.toAndroidQueue.put_nowait("FAILED")
+                    print("Error detected , Movement lock releasing . . .")
+                               
             except Exception as error:
                     print("STM Read Error:", error)
 
@@ -202,10 +223,30 @@ class MultiProcess:
     def sendToSTM(self):
         while True:
             try:
-                #NEED TO ADD MOVEMENT LOCKS AND UNPAUSE CHECKS
+                #Block execution and acquire lock
                 if not self.toSTMQueue.empty():
                     message = self.toSTMQueue.get_nowait()
-                    self.STM32.send(message)
+                    self.unpause.wait()
+                    self.movement_lock.acquire()
+
+                    # Instructions for STM if the message is part of movements
+                    if message.startswith(Protocol.Movements):
+                        self.STM32.send(message) 
+
+                    # Command for taking picture
+                    elif message == "SNAP": 
+                        self.toImageQueue.put_nowait(message)
+
+                    # Completed the run  
+                    elif message == "FIN":
+                        self.unpause.clear()
+                        self.movement_lock.release()
+                        print("Instruction Completed!") 
+                    else: 
+                        raise Exception(f"Unknown instruction: {message}")
+
+
+                        
                 
             except Exception as error:
                  print('Process sendToSTM has failed:', error)
