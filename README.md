@@ -16,16 +16,39 @@ then we take picture, once successful picture taken, we will send a message to S
 - Therefore, its important that we can test a sequence of strings also
 - In order to test this, we need scotch tape and ruler
 
-We should finish defining all the protocols and how message look like and also start implementing into the multiprocessing code in terms of checking.
-Afterwards send a message to the team and tell them all the possible messages and what are the text we're expecting to standardise.
 
 
-Example:    {
-                'target': target, (e.g. "ALGO")
-                'payload': message,
-                
-            }
 
+# Standards/protocols for the message that will be transmitted across teams:
+
+| is the message seperator
+In general, a message will have a header aka what the message is for (TYPE) and some content.
+A message will look like "TYPE|XXXXXX" - XXXX means the content,
+————————————————————————————
+@Android team, this is how the message should look like when you send to us:
+"TASK1|[{'x':6,'y':2,'d':4}, {'x':4,'y':2,'d':0}, {'x':5,'y':2,'d':2}]" 
+this message is for task 1 image rec, the header is TASK1, content is a list of dictionary with the coordinates and direction of obstacle.  @Algo team, this is the message you will receive also, so you will need to be able to interpret the message also.
+
+"MANUAL|FR00" - this message is for the single manual movements for when you want to remote control the robot
+
+————————————————————————————
+@Algo team, when you finish processing the message with obstacles from Android, you're expecting to send us this message:
+"TASK1|['FW10', 'FR00', 'FW70', 'BR00', 'BW20', 'SNAP', 'FW20', 'FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}, {'x':5,'y':2,'d':2, 's':1}]"
+Header is TASK1, then | seperator, then first part of the message is a list of commands, then another | seperator, second part of message is the a list of  states where the robot should be when going through task 1, s represents screenshot if s:1, then robot will take screenshot there. 
+
+@Android team, when we receive this message from algo, we will be sending you the part "[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2, 's':0}, {'x':5,'y':2,'d':2, 's':1}]" of the message which is the locations of the robot, so you will need to setup to receive and interpret the message also. The way your simulator should work is, when you receive this message, you just continue waiting for more messages, when you receive a "NEXT" string from us, then you can assume the first location of the robot in the list is reached, and move your simulator robot as accordingly to the correct location.
+
+If you receive a "FAIL" from us, assume there was some error and just show an error message.
+
+
+
+————————————————————————————
+@STM team, the message you will receive from us for task 1 is single messages e.g.
+"FW10"
+"FR00"
+When you receive this message, you need to complete the given movement, once the movement is completed, then you need to send us an acknowledge message. Just send us "ACK" as a string.
+
+————————————————————————————
 
 # RPI:
 ## Multithreading:
