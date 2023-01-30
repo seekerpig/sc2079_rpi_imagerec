@@ -1,13 +1,13 @@
 import time
 import serial
 import STM_PROTOCOL
-import SERIAL_PORT, BAUD_RATE
+from Config import SERIAL_PORT, BAUD_RATE
 
 class STM:
     def __init__(self, serial_port=SERIAL_PORT, baud_rate=BAUD_RATE) -> None:
         self.baud_rate = baud_rate
         self.serial_port = serial_port
-        self.stm = none 
+        self.stm = None 
     #Establish connection with STM Board
     def connect(self) -> None:
         retry = True
@@ -32,14 +32,14 @@ class STM:
             print(f"[Error] Failed to disconnect STM")
 
     def recv(self, timeout:float =0.5, retries:int = 5 ) -> str:
-    for i in range(retries):
-        try:
-            self.stm.timeout = timeout 
-            if self.stm.inWaiting() > 0:
+        for i in range(retries):
+            try:
+                self.stm.timeout = timeout 
+                if self.stm.inWaiting() > 0:
                     message = self.stm.read(self.stm.inWaiting()).strip().decode("utf-8")
                     return message
-            return None
-        except serial.SerialTimeoutException as error:
+                return None
+            except serial.SerialTimeoutException as error:
                 print(f"[Error] Failed to recieve from STM: {str(error)}. Retrying...")
                 time.sleep(timeout)
         raise Exception("Failed to receive data from STM after multiple retries")
