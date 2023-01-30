@@ -3,7 +3,7 @@ import serial
 import STM_PROTOCOL
 import SERIAL_PORT, BAUD_RATE
 
-class STM:
+class STM32:
     def __init__(self, serial_port=SERIAL_PORT, baud_rate=BAUD_RATE) -> None:
         self.baud_rate = baud_rate
         self.serial_port = serial_port
