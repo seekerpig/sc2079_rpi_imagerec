@@ -5,6 +5,7 @@
 
 MSG_SEPARATOR = "|"
 
+
 #HERE ARE MESSAGES FROM ANDROID:
 class Android:
   #Examples of possible messages for manual:
@@ -31,12 +32,12 @@ class STM:
 
 # Movements
 class Movements:
-  FW = 'FW'.encode()
-  FL = 'FL'.encode()
-  FR = 'FR'.encode()
-  BW = 'BW'.encode()
-  BL = 'BL'.encode()
-  BR = 'BR'.encode()
+  FW = 'FW'
+  FL = 'FL'
+  FR = 'FR'
+  BW = 'BW'
+  BL = 'BL'
+  BR = 'BR'
 
 
 
