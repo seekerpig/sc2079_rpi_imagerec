@@ -12,13 +12,13 @@ class Android:
   # "MANUAL|FR00"
   MANUAL = "MANUAL"
   #Examples of possible messages for TASK1:
-  # "TASK1|[{x:6,y:2,d:4}, {x:4,y:2,d:0}, {x:5,y:2,d:2}]" THE COORDINATE REPRESENTS OBSTACLE HERE
+  # "TASK1|[{'x':6,'y':2,'d':4}, {'x':4,'y':2,'d':0}, {'x':5,'y':2,'d':2}]" THE COORDINATE REPRESENTS OBSTACLE HERE
   TASK1 = "TASK1"
   TASK2 = "TASK2" 
 
 #HERE ARE MESSAGES FROM ALGO:
 class Algo:
-  # "TASK1|[FW10, FR00, FW70, BR00, BW20, SNAP, FW20, FIN]|[{x:1,y:1,d:0}, {x:4,y:2,d:2}, {x:5,y:2,d:2}]" THE COORDINATE REPRESENTS WHERE THE ROBOT WILL BE AT (NOT OBSTACLE)
+  # "TASK1|['FW10', 'FR00', 'FW70', 'BR00', 'BW20', 'SNAP', 'FW20', 'FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}, {'x':5,'y':2,'d':2, 's':1}]" THE COORDINATE REPRESENTS WHERE THE ROBOT WILL BE AT (NOT OBSTACLE)
   TASK1 = "TASK1"
   TASK2 = "TASK2"
 
