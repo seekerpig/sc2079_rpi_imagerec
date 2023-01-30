@@ -47,8 +47,8 @@ class Algo:
         try:
             self.client_socket.close()
             #self.server_socket.close()
-            self.server_socket = None
-            #self.client_sock = None
+            #self.server_socket = None
+            self.client_sock = None
 
         except Exception as error:
             print("Failed to disconnect algo client socket...")
