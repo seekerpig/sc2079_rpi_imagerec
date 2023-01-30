@@ -68,8 +68,8 @@ class MultiProcess:
         except Exception as error:
             print("Error when starting multiprocess.start connections: ", error)
 
-        
-        self.checkProcesses()
+        #checks for if connections are dropped. ignore for now
+        #self.checkProcesses()
     
     def end(self):
         if self.Android is not None:
@@ -95,7 +95,7 @@ class MultiProcess:
                     if rawMessage.startwith(Protocol.Android.TASK1):
                         #If message is for doing task 1, the message should consist of two parts, header and obstacle coordinates
                         # "TASK1|[{'x':6,'y':2,'d':4}, {'x':4,'y':2,'d':0}, {'x':5,'y':2,'d':2}]" THE COORDINATE REPRESENTS OBSTACLE HERE
-                        
+
                         messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
                         if (len(messageList) > 1):
                             self.toAlgoQueue.put_nowait(rawMessage)
@@ -181,7 +181,7 @@ class MultiProcess:
                 if raw_message is None:
                     continue
                 #Completed or REACH,FW,FW,Fl,FR,BW
-                message = raw_messag.split(COMMA_SEPARATOR)
+                message = raw_message.split(COMMA_SEPARATOR)
                 
                 if message[0] == STM_status.COMPLETED: # task completed
                     
@@ -237,8 +237,9 @@ class MultiProcess:
             self.toAlgoQueue.get()
         while not self.toSTMQueue.empty():
             self.toSTMQueue.get()
-        while not self.toAndroidQueue.empty():
+        while not self.toImageQueue.empty():
             self.toImageQueue.get()
+        print("All queues cleared")
 
     @staticmethod
     def outdoorsify(original):
