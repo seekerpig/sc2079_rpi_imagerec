@@ -23,7 +23,7 @@ class MultiProcess:
         self.ImageRec =  ImageClient()
         
         #creating some movement and event locks
-        self.movement_lock = manager.Lock()
+        self.movement_lock = Manager.Lock()
         self.unpause = Manager.Event()
 
         #creating message queues for each of the relevant process
