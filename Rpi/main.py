@@ -1,9 +1,9 @@
 #actual code
-#from multiprocess import MultiProcess
+from multiprocess import MultiProcess
 
 
 #testing android code
-from testingAndroid import MultiProcess
+#from testingAndroid import MultiProcess
 
 def init():
     print("Starting up group 6 rpi")

@@ -94,8 +94,8 @@ class MultiProcess:
                     
                     if rawMessage.startwith(Protocol.Android.TASK1):
                         #If message is for doing task 1, the message should consist of two parts, header and obstacle coordinates
-                        # "TASK1|[{x:6,y:2,d:4}, {x:4,y:2,d:0}, {x:5,y:2,d:2}]" THE COORDINATE REPRESENTS OBSTACLE HERE
-
+                        # "TASK1|[{'x':6,'y':2,'d':4}, {'x':4,'y':2,'d':0}, {'x':5,'y':2,'d':2}]" THE COORDINATE REPRESENTS OBSTACLE HERE
+                        
                         messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
                         if (len(messageList) > 1):
                             self.toAlgoQueue.put_nowait(rawMessage)
