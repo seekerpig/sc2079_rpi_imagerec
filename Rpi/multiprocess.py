@@ -6,6 +6,8 @@ from Android import Android
 from STM32 import STM32
 from Algo import Algo
 from imageClient import ImageClient
+
+#Extra config / helpers
 import Protocol
 import ast
 
