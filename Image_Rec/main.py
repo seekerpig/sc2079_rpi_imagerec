@@ -6,6 +6,7 @@ import time
 import glob
 import torch
 from PIL import Image
+from model import *
 #from imutils import paths
 
 
@@ -14,17 +15,12 @@ def init():
     imageServer = Server()
     imageServer.start()
 
-def load_model():
-    model = torch.hub.load('./', 'custom', path='best.pt', source='local')
-    return model
-
-def predict_image(image_path):
-    model = load_model()
-    img = Image.open(image_path)
-    result = model(img)
-    results.save('runs')
-    return result
-
+def image_predict():
+    # save the image file to the uploads folder
+    file = request.files['file']
+    filename = file.filename
+    print(filename)
+    file.save(os.path.join('uploads', filename))
 
 if __name__ == "__main__":
     init()

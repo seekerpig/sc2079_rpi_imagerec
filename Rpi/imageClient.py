@@ -24,6 +24,7 @@ class ImageClient:
         #convert the image taken to numpy array instead of saving to a file
         self.stream = io.BytesIO()
         self.camera.capture(self.stream, format='jpeg')
+        self.camera.capture('Image_Rec/uploads/image.jpg')
         self.stream.seek(0)
         self.img = cv2.imdecode(np.frombuffer(self.stream.getvalue(), dtype=np.uint8), 1)
 
