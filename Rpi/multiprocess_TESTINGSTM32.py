@@ -51,7 +51,7 @@ class MultiProcess:
         try:
             print("Starting connections..")
             self.Android.connect()
-            self.Algo.connect()
+            #self.Algo.connect()
             self.STM32.connect()
             #I think imageRec no need connect? not sure
             #self.ImageRec.connect()
@@ -152,7 +152,12 @@ class MultiProcess:
     def receiveFromAlgo(self):
         while True:
             try:
-                 rawMessage = self.Algo.receive()
+                 #rawMessage = self.Algo.receive()
+
+                 #type the commands algo will send here
+                 #e.g.
+                 rawMessage = input("Enter a message from receiving from Algo")
+
                  if rawMessage is None:
                      continue
 
@@ -183,7 +188,10 @@ class MultiProcess:
             try:
                 if not self.toAlgoQueue.empty():
                     message = self.toAlgoQueue.get_nowait()
-                    self.Algo.send(message)
+                    #self.Algo.send(message)
+                    print("")
+                    print("Message being sent to Algo...")
+                    print("Message is: ", message)
                 
             except Exception as error:
                 print("Send to algo error:", error)
@@ -247,10 +255,23 @@ class MultiProcess:
     def sendToImageRec(self):
         while True:
             try:
-                pass
+                if not self.toImageQueue.empty():
+                    message = self.toImageQueue.get_nowait()
+                    #self.Algo.send(message)
+                    print("")
+                    print("Message being sent to Image Rec...")
+                    print("Message is: ", message)
+
+                    print("Assuming image rec has performed image rec successfully..")
+                    print("Image id detected is 13, sending to Android Queue recognised image id")
+                    self.toAndroidQueue.put_nowait("IMAGEID|13")
+
+                    #release lock so we can send new commands to STM32.
+                    self.movement_lock.release()
+
+                
             except Exception as error:
-                print(error)
-                raise error
+                print("Send to image rec error:", error)
 
     
     def checkProcesses(self):
