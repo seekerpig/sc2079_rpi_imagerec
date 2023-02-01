@@ -7,6 +7,7 @@ import glob
 import torch
 from PIL import Image
 from model import *
+import subprocess
 #from imutils import paths
 
 
@@ -15,12 +16,7 @@ def init():
     imageServer = Server()
     imageServer.start()
 
-def image_predict():
-    # save the image file to the uploads folder
-    file = request.files['file']
-    filename = file.filename
-    print(filename)
-    file.save(os.path.join('uploads', filename))
 
 if __name__ == "__main__":
     init()
+    run_yolov5_server()
