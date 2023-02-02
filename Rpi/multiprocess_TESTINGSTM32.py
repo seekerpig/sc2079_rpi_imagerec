@@ -51,7 +51,7 @@ class MultiProcess:
         try:
             print("Starting connections..")
             self.Android.connect()
-            self.Algo.connect()
+            #self.Algo.connect()
             self.STM32.connect()
             #I think imageRec no need connect? not sure
             #self.ImageRec.connect()
@@ -152,7 +152,15 @@ class MultiProcess:
     def receiveFromAlgo(self):
         while True:
             try:
-                 rawMessage = self.Algo.receive()
+                 #rawMessage = self.Algo.receive()
+
+                 #type the commands algo will send here
+                 #e.g. "TASK1|['FW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
+                 #e.g. "TASK1|['FR00','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
+                 #e.g. "TASK1|['BR00']|[{'x':1,'y':1,'d':0, 's':0}]"
+                 #e.g. "TASK1|['FR00','FW30','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
+                 rawMessage = input("Enter a message from receiving from Algo")
+
                  if rawMessage is None:
                      continue
 
@@ -183,7 +191,10 @@ class MultiProcess:
             try:
                 if not self.toAlgoQueue.empty():
                     message = self.toAlgoQueue.get_nowait()
-                    self.Algo.send(message)
+                    #self.Algo.send(message)
+                    print("")
+                    print("Message being sent to Algo...")
+                    print("Message is: ", message)
                 
             except Exception as error:
                 print("Send to algo error:", error)
