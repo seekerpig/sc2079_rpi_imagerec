@@ -5,7 +5,7 @@ from multiprocessing import Process, Value, Manager, Queue
 from Android import Android
 from STM32 import STM32
 from Algo import Algo
-from imageClient import ImageClient
+#from imageClient import ImageClient
 
 #Extra config / helpers
 import Protocol
@@ -24,7 +24,7 @@ class MultiProcess:
         self.Android = Android()
         self.STM32 = STM32()
         self.Algo = Algo()
-        self.ImageRec =  ImageClient()
+        #self.ImageRec =  ImageClient()
         
         #creating some movement and event locks
         self.movement_lock = manager.Lock()
@@ -105,6 +105,7 @@ class MultiProcess:
                             self.mode = 1
                             self.toAlgoQueue.put_nowait(rawMessage)
                             self.unpause.set()
+                            
                         else:
                             print("Message is from android for task 1 is not complete, hence not processed.")
                         
@@ -150,40 +151,40 @@ class MultiProcess:
     
 
     def receiveFromAlgo(self):
-        while True:
-            try:
-                 #rawMessage = self.Algo.receive()
+        #while True:
+        try:
+                #rawMessage = self.Algo.receive()
 
-                 #type the commands algo will send here
-                 #e.g. "TASK1|['FW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
-                 #e.g. "TASK1|['FR00','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
-                 #e.g. "TASK1|['BR00']|[{'x':1,'y':1,'d':0, 's':0}]"
-                 #e.g. "TASK1|['FR00','FW30','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
-                 rawMessage = input("Enter a message from receiving from Algo")
+                #type the commands algo will send here
+                #e.g. "TASK1|['FW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
+                #e.g. "TASK1|['FR00','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
+                #e.g. "TASK1|['BR00']|[{'x':1,'y':1,'d':0, 's':0}]"
+                #e.g. "TASK1|['FR00','FW30','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
+                rawMessage = "TASK1|['FW10','FR00','BL00','BW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
 
-                 if rawMessage is None:
-                     continue
+                #if rawMessage is None:
+                    #continue
 
-                 if rawMessage.startswith(Protocol.Algo.TASK1): 
-                    
-                     messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
-
-                     if (len(messageList) == 3):
-                        
-                             #Sending the message from the list individually to the queue
-                             #example, FW10 , FW00 etc... 
-                             message_list = ast.literal_eval(messageList[1])
-                             for item in message_list:
-                                  self.toSTMQueue.put_nowait(item)
-
-                             #Sending the Robot coordinates to Android
-                             if self.mode == 1: 
-                                self.toAndroidQueue.put_nowait(messageList[2])
-                                self.unpause.set()
-
+                if rawMessage.startswith(Protocol.Algo.TASK1): 
                 
-            except Exception as error:
-                print("Receive from algo error:", error)
+                    messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
+
+                    if (len(messageList) == 3):
+                    
+                        #Sending the message from the list individually to the queue
+                        #example, FW10 , FW00 etc... 
+                        message_list = ast.literal_eval(messageList[1])
+                        for item in message_list:
+                            self.toSTMQueue.put_nowait(item)
+
+                        #Sending the Robot coordinates to Android
+                        if self.mode == 1: 
+                            self.toAndroidQueue.put_nowait(messageList[2])
+                            self.unpause.set()
+
+            
+        except Exception as error:
+            print("Receive from algo error:", error)
 
 
     def sendToAlgo(self):
@@ -195,6 +196,7 @@ class MultiProcess:
                     print("")
                     print("Message being sent to Algo...")
                     print("Message is: ", message)
+                    self.receiveFromAlgo()
                 
             except Exception as error:
                 print("Send to algo error:", error)
@@ -235,8 +237,15 @@ class MultiProcess:
                     self.unpause.wait()
                     self.movement_lock.acquire()
 
+                    print("message sent to stm", message)
                     # Instructions for STM if the message is part of movements
-                    if any(message.startswith(v) for v in Protocol.Movements.__dict__.values()):
+                      # Completed the run  
+                    if message == "FIN":
+                        self.unpause.clear()
+                        self.movement_lock.release()
+                        print("Instruction Completed!") 
+
+                    elif any(message.startswith(v) for v in Protocol.Movements.__dict__.values()):
                         self.STM32.send(message) 
 
                     # Command for taking picture
@@ -244,10 +253,10 @@ class MultiProcess:
                         self.toImageQueue.put_nowait(message)
 
                     # Completed the run  
-                    elif message == "FIN":
-                        self.unpause.clear()
-                        self.movement_lock.release()
-                        print("Instruction Completed!") 
+                    #elif message == "FIN":
+                       # self.unpause.clear()
+                       # self.movement_lock.release()
+                       # print("Instruction Completed!") 
                     else: 
                         raise Exception(f"Unknown instruction: {message}")
 

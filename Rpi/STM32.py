@@ -42,6 +42,6 @@ class STM32:
     def send(self, message) -> None:
         try:
             print(f"[STM] Message to STM: {message}")
-            self.stm.write(message.encode("utf-8"))
+            self.stm.write(f"{message}\n".encode("utf-8"))
         except Exception as error:
             print(f"[Error] Failed to send to STM: {str(error)}")
