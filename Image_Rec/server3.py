@@ -1,9 +1,12 @@
 import argparse
 import io
-
+from ultralytics import YOLO
 import torch
 from flask import Flask, request
 from PIL import Image
+
+
+model = YOLO('MDP.pt')
 
 app = Flask(__name__)
 
@@ -24,7 +27,6 @@ def predict():
         img = Image.open(io.BytesIO(image_bytes))
 
         results = model(img, size=640)  # reduce size=320 for faster inference
-        #results = model(img)
         results.save('runs')
         return results.pandas().xyxy[0].to_json(orient="records")
     
@@ -32,10 +34,8 @@ def predict():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flask API exposing YOLOv5 model")
-    parser.add_argument("--port", default=5007, type=int, help="port number")
+    parser.add_argument("--port", default=5010, type=int, help="port number")
     args = parser.parse_args()
-    model = torch.hub.load("ultralytics/yolov5","custom",path="trialmodel.pt")
-    #model = torch.load("ultralytics/yolov5", "yolov5s", force_reload=True)  # force_reload to recache
     app.run(host="0.0.0.0", port=args.port)  # debug=True causes Restarting with stat
     
 
