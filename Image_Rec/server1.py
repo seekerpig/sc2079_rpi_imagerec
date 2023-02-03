@@ -1,6 +1,3 @@
-"""
-Run a rest API exposing the yolov5s object detection model
-"""
 import argparse
 import io
 
@@ -33,10 +30,9 @@ def predict():
     
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flask API exposing YOLOv5 model")
-    parser.add_argument("--port", default=5005, type=int, help="port number")
+    parser.add_argument("--port", default=5007, type=int, help="port number")
     args = parser.parse_args()
     model = torch.hub.load("ultralytics/yolov5","custom",path="best1.pt")
     #model = torch.load("ultralytics/yolov5", "yolov5s", force_reload=True)  # force_reload to recache
