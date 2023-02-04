@@ -108,7 +108,7 @@ class MultiProcess:
                             self.unpause.set()
                             
                         else:
-                            print("Message is from android for task 1 is not complete, hence not processed.")
+                            print("Message from android for task 1 is not complete, hence not processed. Length of message lesser than 2.")
                         
 
                     elif rawMessage.startswith(Protocol.Android.TASK2):
@@ -197,6 +197,8 @@ class MultiProcess:
                     print("")
                     print("Message being sent to Algo...")
                     print("Message is: ", message)
+
+                    #for testing purposes only.
                     #self.receiveFromAlgo()
                 
             except Exception as error:
@@ -220,9 +222,9 @@ class MultiProcess:
                     if self.mode==1: 
                        self.toAndroidQueue.put_nowait("NEXT") 
 
-                if raw_massage.startswith("FAILED"):
+                elif raw_massage.startswith("FAIL"):
                     self.movement_lock.release()
-                    self.toAndroidQueue.put_nowait("FAILED")
+                    self.toAndroidQueue.put_nowait("FAIL")
                     print("Error detected , Movement lock releasing . . .")
                                
             except Exception as error:
@@ -247,7 +249,7 @@ class MultiProcess:
                         print("Instruction Completed!") 
 
                     # Command for taking picture
-                    elif message == "SNAP": 
+                    elif message.startswith("SNAP"): 
                         self.toImageQueue.put_nowait(message)
 
                     elif any(message.startswith(v) for v in Protocol.Movements.__dict__.values()):
