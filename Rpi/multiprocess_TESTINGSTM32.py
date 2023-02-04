@@ -126,7 +126,9 @@ class MultiProcess:
                             self.unpause.set()
                         else:
                             print("Message is from android for MANUAL is not complete, hence not processed.")
-
+                    elif (rawMessage.startsWith("A5TASK")):
+                        self.unpause.set()
+                        self.navigateSingleObstacle()
                     else:
                         print("Raw message is not recognised from Android")
 
@@ -277,14 +279,31 @@ class MultiProcess:
                     print("")
                     print("Message being sent to Image Rec...")
                     print("Message is: ", message)
-
+                    
+                    #results = json.loads(response.content)
                     print("Assuming image rec has performed image rec successfully..")
                     print("Image id detected is 13, sending to Android Queue recognised image id")
-                    self.toAndroidQueue.put_nowait("IMAGEID|13")
-
                     #release lock so we can send new commands to STM32.
                     self.movement_lock.release()
 
+                    self.toAndroidQueue.put_nowait("IMAGEID|1|13")
+
+                    #basically if an image is detected and the symbol is 41, then we dont do anything
+                    #if symbol is not 41, then we know non bulleyes, means we can clear the command queue to stop 
+                    #sending more commands to move
+                    #ONLY UNCOMMENT THIS PART FOR CLEARING TASK A5 I think.
+
+                    # if(results.get("id") != "41"):
+                    #     # stop issuing commands
+                    #     self.unpause.clear()
+
+                    #     # clear commands queue
+                    #     while not self.command_queue.empty():
+                    #         self.command_queue.get()
+
+                    #     self.logger.info("Found non-bullseye face, remaining commands and path cleared.")
+                    #     self.android_queue.put(AndroidMessage("info", "Found non-bullseye face, remaining commands cleared."))
+                        
                 
             except Exception as error:
                 print("Send to image rec error:", error)
@@ -322,3 +341,29 @@ class MultiProcess:
             return original.replace("BW", "BS")
         else:
             return original
+
+
+    def navigateSingleObstacle(self):
+        # travel around obstacle until image detected (non bulleye)
+
+        hardcoded_path = [
+            "DT20", "SNAP", "NOOP",
+            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+            "FIN"
+        ]
+
+        # put commands and paths into queues
+        self.clear_queues()
+        for c in hardcoded_path:
+            self.toSTMQueue.put_nowait(c)
+            #dont need to tell android i believe, so never talk to android.
+            # self.path_queue.put({
+            #     "d": 0,
+            #     "s": -1,
+            #     "x": 1,
+            #     "y": 1
+            # })
+
+        print("Navigate-around-obstacle path loaded. Robot is ready to move.")    
