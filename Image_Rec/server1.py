@@ -30,6 +30,7 @@ def predict():
 
         results = model(img, size=640)  # reduce size=320 for faster inference
         results.save('runs')
+        stitch_image()
         #return results.pandas().xyxy[0].to_json(orient="records")
         df_results = results.pandas().xyxy[0]
 
