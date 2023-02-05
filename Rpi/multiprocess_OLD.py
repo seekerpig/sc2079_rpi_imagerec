@@ -124,7 +124,8 @@ class MultiProcess:
                             self.unpause.set()
                         else:
                             print("Message is from android for MANUAL is not complete, hence not processed.")
-
+                    elif (rawMessage == "A5TASK"):
+                        self.navigateSingleObstacle()
                     else:
                         print("Raw message is not recognised from Android")
 
@@ -298,3 +299,28 @@ class MultiProcess:
             return original.replace("BW", "BS")
         else:
             return original
+
+    def navigateSingleObstacle(self):
+        # travel around obstacle until image detected (non bulleye)
+
+        hardcoded_path = [
+            "DT20", "SNAP", "NOOP",
+            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+            "FIN"
+        ]
+
+        # put commands and paths into queues
+        self.clear_queues()
+        for c in hardcoded_path:
+            self.toSTMQueue.put_nowait(c)
+            #dont need to tell android i believe, so never talk to android.
+            # self.path_queue.put({
+            #     "d": 0,
+            #     "s": -1,
+            #     "x": 1,
+            #     "y": 1
+            # })
+
+        print("Navigate-around-obstacle path loaded. Robot is ready to move.")
