@@ -12,14 +12,15 @@ app = Flask(__name__)
 
 DETECTION_URL = "/Test"
 
-#flask connection
+# flask connection
+
 
 @app.route("/")
 def home():
     return "<h1>Welcome to the HomePage!</h1>"
+
+
 @app.route(DETECTION_URL, methods=["POST"])
-
-
 def predict():
 
     if request.files.get("image"):
@@ -31,11 +32,9 @@ def predict():
         results = model(img, size=640)  # reduce size=320 for faster inference
         results.save('runs')
         stitch_image()
-        #return results.pandas().xyxy[0].to_json(orient="records")
+        # return results.pandas().xyxy[0].to_json(orient="records")
         df_results = results.pandas().xyxy[0]
 
-    
-    
         df_results['bboxHt'] = df_results['ymax'] - df_results['ymin']
         df_results['bboxWt'] = df_results['xmax'] - df_results['xmin']
         df_results['bboxArea'] = df_results['bboxHt'] * df_results['bboxWt']
@@ -44,14 +43,12 @@ def predict():
         print(df_results)
         pred_list = df_results['name'].to_numpy()
         pred = 'NA'
-        
-        
+
         if pred_list.size > 0:
             for i in pred_list:
                 if i != 'Bullseye':
                     pred = i
-                    
-        
+
         Symbol_Map_to_id = {
             "NA": 'NA',
             "11": 11,
@@ -86,12 +83,12 @@ def predict():
             "40": 40,
             "41": 41
         }
-        
-        image_id = Symbol_Map_to_id.get(pred, 'NA')
-        result = { "image_id": image_id }
 
+        image_id = Symbol_Map_to_id.get(pred, 'NA')
+        result = {"image_id": image_id}
 
         return jsonify(result)
+
 
 def stitch_image():
     imgFolder = 'runs'
@@ -104,17 +101,19 @@ def stitch_image():
     stitchedImg = Image.new('RGB', (total_width, max_height))
     x_offset = 0
     for im in images:
-        stitchedImg.paste(im, (x_offset,0))
+        stitchedImg.paste(im, (x_offset, 0))
         x_offset += im.size[0]
     stitchedImg.save(newPath)
 
 
-        
+def load_model():
+    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/best.pt', source='local')
+    return model
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flask API exposing YOLOv5 model")
     parser.add_argument("--port", default=5005, type=int, help="port number")
     args = parser.parse_args()
-    model = torch.hub.load("ultralytics/yolov5","custom",path="best.pt")
+    model = load_model()
     app.run(host="0.0.0.0", port=args.port)  # debug=True causes Restarting with stat
-    
-
