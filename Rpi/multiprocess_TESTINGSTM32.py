@@ -113,8 +113,8 @@ class MultiProcess:
 
                     elif rawMessage.startswith(Protocol.Android.TASK2):
                         #TODO task 2 for the project
+                        self.toSTMQueue.put_nowait("Forward_to_obs")
                         self.unpause.set()
-                        pass
 
                     elif rawMessage.startswith(Protocol.Android.MANUAL):
                         #If message is for MANUAL movement, the message should consist of two parts, header and command
@@ -214,7 +214,8 @@ class MultiProcess:
             if raw_massage is None:
                     continue
             try: 
-                if raw_massage.startswith("ACK"): 
+                
+                if raw_message.startswith("ACK"): 
                     
                     # Ack sent therefore releasing lock 
                     self.movement_lock.release()
@@ -224,13 +225,33 @@ class MultiProcess:
                     if self.mode==1: 
                        self.toAndroidQueue.put_nowait("NEXT") 
 
-                elif raw_massage.startswith("FAIL"):
+                elif raw_message.startswith("FAIL"):
                     self.movement_lock.release()
                     self.toAndroidQueue.put_nowait("FAIL")
                     print("Error detected , Movement lock releasing . . .")
+                
+                # Take_Picture|left. to determine which lane is the robot at
+                elif raw_message.startswith("Take_Picture"):
+                    self.movement_lock.release()
+                    message = raw_message.split(Protocol.MSG_SEPARATOR)
+                    if (len(message) > 1):
+                        if (raw_message[1] == "left"):
+                            self.toSTMQueue.put_nowait("FL")
+
+                        elif (raw_message[1] == "right"):
+                            self.toSTMQueue.put_nowait("FR")
+                    else:
+                        self.toImageQueue.put_nowait("Take_Picture")
+                        print("Proceeding to take picture, Movement lock releasing . . . .")
+
+                elif raw_message.startswith("Swerve_completed"):
+                    self.movement_lock.release()
+                    self.toSTMQueue.put_nowait("Forward_to_obs")
+                    print("Proceeding to move forward, Movement lock releasing . . . .")
                                
             except Exception as error:
                     print("STM Read Error:", error)
+
 
                 
     def sendToSTM(self):
@@ -253,10 +274,24 @@ class MultiProcess:
                     # Command for taking picture
                     elif message.startswith("SNAP"): 
                         self.toImageQueue.put_nowait(message)
-
+                    
+                    #Start TASK2, first movement forward to obstacle
+                    elif message.startswith("Forward_to_obs"):
+                        self.STM32.send(message)
+                    
+                    #image pointing to left
+                    elif message.startswith("L_Picture_taken"):
+                        self.STM32.send("Swerve_left")
+                    
+                    #image pointing to right
+                    elif message.startswith("R_Picture_taken"):
+                        self.STM32.send("Swerve_right")
+                    
+                    #todo 
+                    #set up a bigger turn ?
+                    #Check if message start with the movement command
                     elif any(message.startswith(v) for v in Protocol.Movements.__dict__.values()):
                         self.STM32.send(message) 
-
                    
                     # Completed the run  
                     #elif message == "FIN":
