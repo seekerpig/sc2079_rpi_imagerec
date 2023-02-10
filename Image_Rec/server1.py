@@ -7,6 +7,7 @@ import glob
 from imutils import paths
 import os
 import time
+import cv2
 
 app = Flask(__name__)
 
@@ -29,6 +30,7 @@ def predict():
 
         img = Image.open(io.BytesIO(image_bytes))
 
+
         results = model(img, size=640)  # reduce size=320 for faster inference
         results.save('runs')
         stitch_image()
@@ -46,8 +48,9 @@ def predict():
 
         if pred_list.size > 0:
             for i in pred_list:
-                if i != 'Bullseye':
+                if i != '41':
                     pred = i
+
 
         Symbol_Map_to_id = {
             "NA": 'NA',
@@ -95,7 +98,10 @@ def stitch_image():
     newPath = 'uploads/stitched.jpg'
     imgPath = list(paths.list_images(imgFolder))
     images = [Image.open(x) for x in imgPath]
-    width, height = zip(*(i.size for i in images))
+    # Filter images with label "Bullseye"
+    #filtered_images = [img for img in images if "41" not in img]
+    #width, height = zip(*(i.size for i in images))
+    width, height = zip(*(img.size for img in images))
     total_width = sum(width)
     max_height = max(height)
     stitchedImg = Image.new('RGB', (total_width, max_height))
