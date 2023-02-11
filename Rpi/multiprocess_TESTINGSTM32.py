@@ -23,7 +23,7 @@ class MultiProcess:
         #initialising all the classes first
         self.Android = Android()
         self.STM32 = STM32()
-        self.Algo = Algo()
+        #self.Algo = Algo()
         #self.ImageRec =  ImageClient()
         
         #creating some movement and event locks
@@ -51,7 +51,7 @@ class MultiProcess:
         try:
             print("Starting connections..")
             self.Android.connect()
-            self.Algo.connect()
+            #self.Algo.connect()
             self.STM32.connect()
             #I think imageRec no need connect? not sure
             #self.ImageRec.connect()
@@ -66,7 +66,7 @@ class MultiProcess:
             self.sendToAlgoProcess.start()
             self.receiveFromSTMProcess.start()
             self.sendToSTMProcess.start()
-            self.sendToImageRecProcess.start()
+            #self.sendToImageRecProcess.start()
             print("Processes started.")
 
         except Exception as error:
@@ -154,16 +154,16 @@ class MultiProcess:
     
 
     def receiveFromAlgo(self):
-        while True:
+        #while True:
             try:
-                    rawMessage = self.Algo.receive()
+                    #rawMessage = self.Algo.receive()
 
                     #type the commands algo will send here
                     #e.g. "TASK1|['FW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
                     #e.g. "TASK1|['FR00','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
                     #e.g. "TASK1|['BR00']|[{'x':1,'y':1,'d':0, 's':0}]"
                     #e.g. "TASK1|['FR00','FW30','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
-                    #rawMessage = "TASK1|['FW10','FR00','BL00','BW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
+                    rawMessage = "TASK1|['FW10','FR00','BL00','BW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
 
                     #if rawMessage is None:
                         #continue
@@ -195,13 +195,13 @@ class MultiProcess:
             try:
                 if not self.toAlgoQueue.empty():
                     message = self.toAlgoQueue.get_nowait()
-                    self.Algo.send(message)
+                    #self.Algo.send(message)
                     print("")
                     print("Message being sent to Algo...")
                     print("Message is: ", message)
 
                     #for testing purposes only.
-                    #self.receiveFromAlgo()
+                    self.receiveFromAlgo()
                 
             except Exception as error:
                 print("Send to algo error:", error)
