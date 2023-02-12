@@ -46,6 +46,7 @@ def predict():
         pred_list = df_results['name'].to_numpy()
         pred = 'NA'
 
+        #need to remove for bullseye testing
         if pred_list.size > 0:
             for i in pred_list:
                 if i != '41':
