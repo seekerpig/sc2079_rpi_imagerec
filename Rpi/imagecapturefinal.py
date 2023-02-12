@@ -8,7 +8,7 @@ from picamera import PiCamera
 import pprint
 import requests
 
-class ImageCapture:
+class ImageClient:
     def __init__(self):
         self.camera = PiCamera()
         self.camera.resolution = (640, 480)

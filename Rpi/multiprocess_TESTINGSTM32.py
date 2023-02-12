@@ -5,7 +5,7 @@ from multiprocessing import Process, Value, Manager, Queue
 from Android import Android
 from STM32 import STM32
 from Algo import Algo
-#from imageClient import ImageClient
+from imagecapturefinal import ImageClient
 
 #Extra config / helpers
 import Protocol
@@ -24,7 +24,7 @@ class MultiProcess:
         self.Android = Android()
         self.STM32 = STM32()
         #self.Algo = Algo()
-        #self.ImageRec =  ImageClient()
+        self.ImageRec =  ImageClient()
         
         #creating some movement and event locks
         self.movement_lock = manager.Lock()
@@ -209,9 +209,9 @@ class MultiProcess:
     
     def receiveFromSTM(self):
         while True:
-            raw_massage = self.STM32.recv()
+            raw_message = self.STM32.recv()
                 
-            if raw_massage is None:
+            if raw_message is None:
                     continue
             try: 
                 
