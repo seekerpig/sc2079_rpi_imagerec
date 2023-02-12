@@ -42,10 +42,11 @@ class ImageClient:
                 image_data = open(TEST_IMAGE, "rb").read()
                 response = requests.post(self.DETECTION_URL, files={"image": image_data}).json()
                 pprint.pprint(response)
-                self.count+=1    
+                self.count+=1 
+                return response   
 
 def main():
-    image_capture = ImageCapture()
+    image_capture = ImageClient()
     image_capture.capture_and_detect()
 
 if __name__ == "__main__":

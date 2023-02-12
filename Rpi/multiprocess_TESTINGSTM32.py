@@ -315,20 +315,22 @@ class MultiProcess:
                     print("Message being sent to Image Rec...")
                     print("Message is: ", message)
                     
-                    #results = json.loads(response.content)
-                    print("Assuming image rec has performed image rec successfully..")
-                    print("Image id detected is 13, sending to Android Queue recognised image id")
+                    result = self.ImageRec.snap_and_detect()
+                    print("Result from image rec to rpi is: ", result['image_id'])
+
+
                     #release lock so we can send new commands to STM32.
                     self.movement_lock.release()
 
-                    self.toAndroidQueue.put_nowait("IMAGEID|1|13")
+                    #dont need this for now, this is for actual task.
+                    #self.toAndroidQueue.put_nowait("IMAGEID|1|13")
 
                     #basically if an image is detected and the symbol is 41, then we dont do anything
                     #if symbol is not 41, then we know non bulleyes, means we can clear the command queue to stop 
                     #sending more commands to move
-                    #ONLY UNCOMMENT THIS PART FOR CLEARING TASK A5 I think.
 
-                    # if(results.get("id") != "41"):
+                    #ONLY UNCOMMENT THIS PART FOR CLEARING TASK A5 I think.
+                    # if(result['image_id'] != 'NA'):
                     #     # stop issuing commands
                     #     self.unpause.clear()
 
@@ -336,8 +338,8 @@ class MultiProcess:
                     #     while not self.command_queue.empty():
                     #         self.command_queue.get()
 
-                    #     self.logger.info("Found non-bullseye face, remaining commands and path cleared.")
-                    #     self.android_queue.put(AndroidMessage("info", "Found non-bullseye face, remaining commands cleared."))
+                    #     print("Found non-bullseye face, remaining commands and path cleared.")
+
                         
                 
             except Exception as error:
