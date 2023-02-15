@@ -4,8 +4,9 @@ from multiprocessing import Process, Value, Manager, Queue
 #Communication classes
 from Android import Android
 from STM32 import STM32
-from Algo import Algo
+#from Algo import Algo
 from imagecapturefinal import ImageClient
+import time
 
 #Extra config / helpers
 import Protocol
@@ -24,7 +25,7 @@ class MultiProcess:
         self.Android = Android()
         self.STM32 = STM32()
         #self.Algo = Algo()
-        self.ImageRec =  ImageClient()
+        #self.ImageRec =  ImageClient()
         
         #creating some movement and event locks
         self.movement_lock = manager.Lock()
@@ -62,11 +63,11 @@ class MultiProcess:
             print("Starting processes..")
             self.receiveFromAndroidProcess.start()
             self.sendToAndroidProcess.start()
-            self.receiveFromAlgoProcess.start()
-            self.sendToAlgoProcess.start()
+            #self.receiveFromAlgoProcess.start()
+            #self.sendToAlgoProcess.start()
             self.receiveFromSTMProcess.start()
             self.sendToSTMProcess.start()
-            #self.sendToImageRecProcess.start()
+            self.sendToImageRecProcess.start()
             print("Processes started.")
 
         except Exception as error:
@@ -126,7 +127,7 @@ class MultiProcess:
                             self.unpause.set()
                         else:
                             print("Message is from android for MANUAL is not complete, hence not processed.")
-                    elif (rawMessage.startsWith("A5TASK")):
+                    elif (rawMessage.startswith("A5TASK")):
                         self.unpause.set()
                         self.navigateSingleObstacle()
                     else:
@@ -163,10 +164,10 @@ class MultiProcess:
                     #e.g. "TASK1|['FR00','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
                     #e.g. "TASK1|['BR00']|[{'x':1,'y':1,'d':0, 's':0}]"
                     #e.g. "TASK1|['FR00','FW30','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
-                    rawMessage = "TASK1|['FW10','FR00','BL00','BW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
-
-                    #if rawMessage is None:
-                        #continue
+                    #rawMessage = "TASK1|['FW10','FR00','BL00','BW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
+                    rawMessage = None
+                    # if rawMessage is None:
+                     #continue
 
                     if rawMessage.startswith(Protocol.Algo.TASK1): 
                         print("mesage from algo is: ", rawMessage)
@@ -201,7 +202,7 @@ class MultiProcess:
                     print("Message is: ", message)
 
                     #for testing purposes only.
-                    self.receiveFromAlgo()
+                    #self.receiveFromAlgo()
                 
             except Exception as error:
                 print("Send to algo error:", error)
@@ -214,12 +215,13 @@ class MultiProcess:
             if raw_message is None:
                     continue
             try: 
-                
-                if raw_message.startswith("ACK"): 
+                print("Message received from STM:", raw_message)
+                if raw_message.startswith("A"): 
                     
                     # Ack sent therefore releasing lock 
-                    self.movement_lock.release()
+                    
                     print("ACK received, Movement lock releasing . . .")
+                    self.movement_lock.release()
                     
                     #Check if its on path mode then inform android the next position
                     if self.mode==1: 
@@ -273,6 +275,7 @@ class MultiProcess:
 
                     # Command for taking picture
                     elif message.startswith("SNAP"): 
+                        print("done")
                         self.toImageQueue.put_nowait(message)
                     
                     #Start TASK2, first movement forward to obstacle
@@ -291,6 +294,7 @@ class MultiProcess:
                     #set up a bigger turn ?
                     #Check if message start with the movement command
                     elif any(message.startswith(v) for v in Protocol.Movements.__dict__.values()):
+                        time.sleep(0.2)
                         self.STM32.send(message) 
                    
                     # Completed the run  
@@ -306,6 +310,7 @@ class MultiProcess:
 
     #you expect to get the message back from imageRec when sending, so no receive function
     def sendToImageRec(self):
+        camera = ImageClient()
         while True:
             try:
                 if not self.toImageQueue.empty():
@@ -315,13 +320,20 @@ class MultiProcess:
                     print("Message being sent to Image Rec...")
                     print("Message is: ", message)
                     
-                    result = self.ImageRec.snap_and_detect()
-                    print("Result from image rec to rpi is: ", result['image_id'])
+                    
+                    result = camera.snap_and_detect()
+                    print("Result from image rec to rpi is: ", result)
 
 
                     #release lock so we can send new commands to STM32.
-                    self.movement_lock.release()
-
+                    if result == 41 :
+                        self.movement_lock.release()
+                        turn = "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP"
+                        for i in turn :
+                            self.toSTMQueue.put_nowait(i)
+                    else:
+                        self.movement_lock.release()
+                        self.toSTMQueue.put_nowait("FIN")
                     #dont need this for now, this is for actual task.
                     #self.toAndroidQueue.put_nowait("IMAGEID|1|13")
 
@@ -339,9 +351,6 @@ class MultiProcess:
                     #         self.command_queue.get()
 
                     #     print("Found non-bullseye face, remaining commands and path cleared.")
-
-                        
-                
             except Exception as error:
                 print("Send to image rec error:", error)
 
@@ -383,16 +392,27 @@ class MultiProcess:
     def navigateSingleObstacle(self):
         # travel around obstacle until image detected (non bulleye)
 
-        hardcoded_path = [
-            "DT20", "SNAP", "NOOP",
-            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
-            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
-            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
-            "FIN"
-        ]
+        
+        # hardcoded_path = [
+        #     "SNAP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
+        #     "FIN"
+        # ]
+        hardcoded_path = ["SNAP"]   
+        # hardcoded_path = [
+        #     "DT20", "SNAP", "NOOP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP", "NOOP",
+        #     "FIN"
+        # ]
 
         # put commands and paths into queues
         self.clear_queues()
+    
         for c in hardcoded_path:
             self.toSTMQueue.put_nowait(c)
             #dont need to tell android i believe, so never talk to android.
