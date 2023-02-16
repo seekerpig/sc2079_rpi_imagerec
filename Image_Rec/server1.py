@@ -46,10 +46,10 @@ def predict():
         pred_list = df_results['name'].to_numpy()
         pred = 'NA'
 
-        #need to remove for bullseye testing
+
         if pred_list.size > 0:
             for i in pred_list:
-                if i != '41':
+                #if i != '41': #need to remove for bullseye testing
                     pred = i
 
 
@@ -114,7 +114,7 @@ def stitch_image():
 
 
 def load_model():
-    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/best.pt', source='local')
+    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/besty.pt', source='local')
     return model
 
 
