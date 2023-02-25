@@ -4,7 +4,7 @@ from multiprocessing import Process, Value, Manager, Queue
 #Communication classes
 from Android import Android
 from STM32 import STM32
-#from Algo import Algo
+from Algo import Algo
 from imagecapturefinal import ImageClient
 import time
 
@@ -20,11 +20,11 @@ class MultiProcess:
         manager = Manager()
         #initialising the modes path = 1
         self.mode = 0 
-
+        self.count = 1
         #initialising all the classes first
         self.Android = Android()
         self.STM32 = STM32()
-        #self.Algo = Algo()
+        self.Algo = Algo()
         #self.ImageRec =  ImageClient()
         
         #creating some movement and event locks
@@ -52,7 +52,7 @@ class MultiProcess:
         try:
             print("Starting connections..")
             self.Android.connect()
-            #self.Algo.connect()
+            self.Algo.connect()
             self.STM32.connect()
             #I think imageRec no need connect? not sure
             #self.ImageRec.connect()
@@ -63,8 +63,8 @@ class MultiProcess:
             print("Starting processes..")
             self.receiveFromAndroidProcess.start()
             self.sendToAndroidProcess.start()
-            #self.receiveFromAlgoProcess.start()
-            #self.sendToAlgoProcess.start()
+            self.receiveFromAlgoProcess.start()
+            self.sendToAlgoProcess.start()
             self.receiveFromSTMProcess.start()
             self.sendToSTMProcess.start()
             self.sendToImageRecProcess.start()
@@ -92,7 +92,7 @@ class MultiProcess:
         while True:
             try:
                 rawMessage = self.Android.receive()
-                self.toAndroidQueue.put_nowait("Hello Android")
+                #self.toAndroidQueue.put_nowait("Hello Android")
 
                 if(rawMessage):
                     #TODO need to implement code to check below for who message is for and then do the message process
@@ -155,19 +155,19 @@ class MultiProcess:
     
 
     def receiveFromAlgo(self):
-        #while True:
+        while True:
             try:
-                    #rawMessage = self.Algo.receive()
+                    rawMessage = self.Algo.receive()
 
                     #type the commands algo will send here
                     #e.g. "TASK1|['FW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
                     #e.g. "TASK1|['FR00','FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}]"
                     #e.g. "TASK1|['BR00']|[{'x':1,'y':1,'d':0, 's':0}]"
                     #e.g. "TASK1|['FR00','FW30','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
-                    #rawMessage = "TASK1|['FW10','FR00','BL00','BW10','FIN']|[{'x':1,'y':1,'d':0, 's':0}]"
-                    rawMessage = None
+                    #rawMessage = "TASK1|['BR00','FIN']|[{'x':9,'y':2,'d':0, 's':0}]"
+                    #rawMessage = None
                     # if rawMessage is None:
-                     #continue
+                    #     continue
 
                     if rawMessage.startswith(Protocol.Algo.TASK1): 
                         print("mesage from algo is: ", rawMessage)
@@ -182,9 +182,10 @@ class MultiProcess:
                                 self.toSTMQueue.put_nowait(item)
 
                             #Sending the Robot coordinates to Android
-                            if self.mode == 1: 
-                                self.toAndroidQueue.put_nowait(messageList[2])
-                                self.unpause.set()
+                            #if self.mode == 1: 
+                            self.toAndroidQueue.put_nowait(messageList[2])
+                            print("message okay 123")
+                            self.unpause.set()
 
                 
             except Exception as error:
@@ -196,7 +197,7 @@ class MultiProcess:
             try:
                 if not self.toAlgoQueue.empty():
                     message = self.toAlgoQueue.get_nowait()
-                    #self.Algo.send(message)
+                    self.Algo.send(message)
                     print("")
                     print("Message being sent to Algo...")
                     print("Message is: ", message)
@@ -211,7 +212,7 @@ class MultiProcess:
     def receiveFromSTM(self):
         while True:
             raw_message = self.STM32.recv()
-                
+            
             if raw_message is None:
                     continue
             try: 
@@ -219,13 +220,16 @@ class MultiProcess:
                 if raw_message.startswith("A"): 
                     
                     # Ack sent therefore releasing lock 
-                    
+                    # print(self.mode)
+                    # if self.mode==1: 
+                    self.toAndroidQueue.put_nowait("NEXT")
+
                     print("ACK received, Movement lock releasing . . .")
                     self.movement_lock.release()
                     
                     #Check if its on path mode then inform android the next position
-                    if self.mode==1: 
-                       self.toAndroidQueue.put_nowait("NEXT") 
+                    # if self.mode==1: 
+                    #    self.toAndroidQueue.put_nowait("NEXT") 
 
                 elif raw_message.startswith("FAIL"):
                     self.movement_lock.release()
@@ -323,17 +327,24 @@ class MultiProcess:
                     
                     result = camera.snap_and_detect()
                     print("Result from image rec to rpi is: ", result)
-
+                    
+                    #count = 1
+                    #self.toAndroidQueue.put_nowait("IMAGEID|COUNT|RESULT")
+                    self.toAndroidQueue.put_nowait("IMAGEID|"+str(self.count)+'|'+str(result['image_id']))
+                    #self.toAndroidQueue.put_nowait("NEXT")
+                    self.count +=1
+                    self.movement_lock.release()
 
                     #release lock so we can send new commands to STM32.
-                    if result == 41 :
-                        self.movement_lock.release()
-                        turn = "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP"
-                        for i in turn :
-                            self.toSTMQueue.put_nowait(i)
-                    else:
-                        self.movement_lock.release()
-                        self.toSTMQueue.put_nowait("FIN")
+                    # if(result != None):
+                    #     if result['image_id'] == 41 :
+                    #         self.movement_lock.release()
+                    #         turn = "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP"
+                    #         for i in turn :
+                    #             self.toSTMQueue.put_nowait(i)
+                    #     else:
+                    #         self.movement_lock.release()
+                    #         self.toSTMQueue.put_nowait("FIN")
                     #dont need this for now, this is for actual task.
                     #self.toAndroidQueue.put_nowait("IMAGEID|1|13")
 
