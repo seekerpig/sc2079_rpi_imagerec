@@ -1,22 +1,6 @@
 # sc2079_rpi_imagerec
 Github repository for SC2079 RPI and Image Rec - Group 06
 
-##TODOS:
-- We need to figure out what kind of messages each team will send to each other
-- We need to define how those messages should look like. 
-- Figure out camera height versus obstacle height, then start taking photos
-- We need a function to clear queues
-- What about outdoorsify?
-
-##TODOS for 28/1/2023
-What do we need to test for STM?
-- Movement accuracy for FWXX, BWXX, FR00, FL00, BR00, BL00 
-- We also need to test SNAP and FIN (so when STM finishes executing a sequence of strings and reach "SNAP", STM should send a message back to us,
-then we take picture, once successful picture taken, we will send a message to STM saying continue the path)
-- Therefore, its important that we can test a sequence of strings also
-- In order to test this, we need scotch tape and ruler
-
-
 
 
 # Standards/protocols for the message that will be transmitted across teams:
