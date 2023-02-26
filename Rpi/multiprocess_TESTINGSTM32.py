@@ -279,7 +279,7 @@ class MultiProcess:
 
                     # Command for taking picture
                     elif message.startswith("SNAP"): 
-                        print("done")
+                        
                         self.toImageQueue.put_nowait(message)
                     
                     #Start TASK2, first movement forward to obstacle
@@ -323,16 +323,16 @@ class MultiProcess:
                     print("")
                     print("Message being sent to Image Rec...")
                     print("Message is: ", message)
-                    
+                    count = message[-1]
                     
                     result = camera.snap_and_detect()
                     print("Result from image rec to rpi is: ", result)
                     
-                    #count = 1
+                    
                     #self.toAndroidQueue.put_nowait("IMAGEID|COUNT|RESULT")
-                    self.toAndroidQueue.put_nowait("IMAGEID|"+str(self.count)+'|'+str(result['image_id']))
+                    self.toAndroidQueue.put_nowait("IMAGEID|"+str(count)+'|'+str(result['image_id']))
                     #self.toAndroidQueue.put_nowait("NEXT")
-                    self.count +=1
+                    #self.count +=1
                     self.movement_lock.release()
 
                     #release lock so we can send new commands to STM32.
