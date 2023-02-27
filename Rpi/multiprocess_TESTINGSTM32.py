@@ -183,7 +183,7 @@ class MultiProcess:
 
                             #Sending the Robot coordinates to Android
                             #if self.mode == 1: 
-                            self.toAndroidQueue.put_nowait(messageList[2])
+                            self.toAndroidQueue.put_nowait("PATHS|" + messageList[2])
                             print("message okay 123")
                             self.unpause.set()
 
