@@ -29,10 +29,7 @@ def predict():
         image_bytes = image_file.read()
 
         img = Image.open(io.BytesIO(image_bytes))
-        
-        #folder_path = "/Image_Rec/raw"
-        #file_path = os.path.join(folder_path, "image_{}.jpg".format(uuid.uuid4()))
-        #img.save(file_path)
+
 
         results = model(img, size=640)  # reduce size=320 for faster inference
         results.save('runs')
@@ -45,6 +42,7 @@ def predict():
         df_results['bboxArea'] = df_results['bboxHt'] * df_results['bboxWt']
 
         df_results = df_results.sort_values('bboxArea', ascending=True)  # Label with largest bbox height will be last
+        print(df_results.to_string(index=False))
         print(df_results)
         pred_list = df_results['name'].to_numpy()
         pred = 'NA'
@@ -55,15 +53,58 @@ def predict():
                 #if i != '41': #need to remove for bullseye testing
                     pred = i
 
+        for i in df_results:
+                image_id = i[0]
+                bbox = i[2]
+                x_coordinate = int(bbox[0])
+                height = int(bbox[3])
+
+                # calculate distance
+                if height > 190:
+                    distance = 15
+                elif height > 170:
+                    distance = 20
+                elif height > 150:
+                    distance = 25
+                elif height > 133:
+                    distance = 30
+                elif height > 117:
+                    distance = 35
+                elif height > 95:
+                    distance = 40
+                elif height > 85:
+                    distance = 45
+                elif height > 78:
+                    distance = 50
+                elif height > 72:
+                    distance = 55
+                elif height > 64:
+                    distance = 60
+                elif height > 61:
+                    distance = 65
+                elif height > 58:
+                    distance = 70
+                else:
+                    distance = 75
+                    # 52 is height of 80 cm
+
+                # calculate position
+                if x_coordinate < 83:
+                    position = "LEFT"
+                elif x_coordinate < 166:
+                    position = "CENTRE"
+                else:
+                    position = "RIGHT"
+                    # 250 is maximum
 
         Symbol_Map_to_id = {
             "NA": 'NA',
             "11": 11, #1
-            "12": 12, #2
-            "13": 13, #3
-            "14": 14, #4
-            "15": 15, #5
-            "16": 16, #6
+            "12": 12, 
+            "13": 13,
+            "14": 14,
+            "15": 15,
+            "16": 16,
             "17": 17,
             "18": 18,
             "19": 19,

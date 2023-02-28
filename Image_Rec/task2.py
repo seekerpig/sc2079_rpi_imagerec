@@ -1,5 +1,6 @@
 import argparse
 import io
+import torch
 from flask import Flask, request, jsonify
 from PIL import Image
 import glob
@@ -7,21 +8,20 @@ from imutils import paths
 import os
 import time
 import cv2
-from ultralytics import YOLO
 
 app = Flask(__name__)
 
 DETECTION_URL = "/Test"
 
-#flask connection
+# flask connection
+
 
 @app.route("/")
 def home():
     return "<h1>Welcome to the HomePage!</h1>"
+
+
 @app.route(DETECTION_URL, methods=["POST"])
-
-
-
 def predict():
 
     if request.files.get("image"):
@@ -29,40 +29,39 @@ def predict():
         image_bytes = image_file.read()
 
         img = Image.open(io.BytesIO(image_bytes))
-
-        results = model(img, visualize=True)
-        # reduce size=320 for faster inference
+        
+        results = model(img, size=640)  # reduce size=320 for faster inference
         results.save('runs')
         stitch_image()
-        #return results.pandas().xyxy[0].to_json(orient="records")
+        # return results.pandas().xyxy[0].to_json(orient="records")
         df_results = results.pandas().xyxy[0]
+        df_results1 = df_results[df_results['name'] != '41']
 
-    
-    
-        df_results['bboxHt'] = df_results['ymax'] - df_results['ymin']
-        df_results['bboxWt'] = df_results['xmax'] - df_results['xmin']
-        df_results['bboxArea'] = df_results['bboxHt'] * df_results['bboxWt']
 
-        df_results = df_results.sort_values('bboxArea', ascending=True)  # Label with largest bbox height will be last
-        print(df_results)
-        pred_list = df_results['name'].to_numpy()
+        df_results1['bboxHt'] = df_results1['ymax'] - df_results1['ymin']
+        df_results1['bboxWt'] = df_results1['xmax'] - df_results1['xmin']
+        df_results1['bboxArea'] = df_results1['bboxHt'] * df_results1['bboxWt']
+
+        df_results1 = df_results1.sort_values('bboxArea', ascending=True)  # Label with largest bbox height will be last
+        print(df_results1)
+        pred_list = df_results1['name'].to_numpy()
         pred = 'NA'
-        
-        
+
+
         if pred_list.size > 0:
             for i in pred_list:
-                if i != 'Bullseye':
+                #if i != '41': #need to remove for bullseye testing
                     pred = i
-                    
-        
+
+
         Symbol_Map_to_id = {
             "NA": 'NA',
-            "11": 11,
-            "12": 12,
-            "13": 13,
-            "14": 14,
-            "15": 15,
-            "16": 16,
+            "11": 11, #1
+            "12": 12, #2
+            "13": 13, #3
+            "14": 14, #4
+            "15": 15, #5
+            "16": 16, #6
             "17": 17,
             "18": 18,
             "19": 19,
@@ -89,38 +88,40 @@ def predict():
             "40": 40,
             "41": 41
         }
-        
-        image_id = Symbol_Map_to_id.get(pred, 'NA')
-        result = { "image_id": image_id }
 
+        image_id = Symbol_Map_to_id.get(pred, 'NA')
+        result = {"image_id": image_id}
 
         return jsonify(result)
+
 
 def stitch_image():
     imgFolder = 'runs'
     newPath = 'uploads/stitched.jpg'
-    imgPath = paths.list_images(imgFolder)
-    images = []
-    for path in imgPath:
-        images.append(Image.open(path))
-
-    width, height = zip(*(i.size for i in images))
+    imgPath = list(paths.list_images(imgFolder))
+    images = [Image.open(x) for x in imgPath]
+    # Filter images with label "Bullseye"
+    #filtered_images = [img for img in images if "41" not in img]
+    #width, height = zip(*(i.size for i in images))
+    width, height = zip(*(img.size for img in images))
     total_width = sum(width)
     max_height = max(height)
     stitchedImg = Image.new('RGB', (total_width, max_height))
     x_offset = 0
     for im in images:
-        stitchedImg.paste(im, (x_offset,0))
+        stitchedImg.paste(im, (x_offset, 0))
         x_offset += im.size[0]
     stitchedImg.save(newPath)
 
 
-        
+def load_model():
+    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/besty.pt', source='local')
+    return model
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Flask API exposing YOLOv8 model")
+    parser = argparse.ArgumentParser(description="Flask API exposing YOLOv5 model")
     parser.add_argument("--port", default=5005, type=int, help="port number")
     args = parser.parse_args()
-    model = YOLO("MDP.pt")
+    model = load_model()
     app.run(host="0.0.0.0", port=args.port)  # debug=True causes Restarting with stat
-    
-
