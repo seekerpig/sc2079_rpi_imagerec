@@ -52,7 +52,7 @@ def predict():
 
         if pred_list.size > 0:
             for i in pred_list:
-                #if i != '41': #need to remove for bullseye testing
+                if i != '41': #need to remove for bullseye testing
                     pred = i
 
 
@@ -117,7 +117,7 @@ def stitch_image():
 
 
 def load_model():
-    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/besty.pt', source='local')
+    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/bestyy.pt', source='local')
     return model
 
 
