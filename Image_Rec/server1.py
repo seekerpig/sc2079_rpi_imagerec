@@ -44,7 +44,15 @@ def predict():
         df_results['bboxWt'] = df_results['xmax'] - df_results['xmin']
         df_results['bboxArea'] = df_results['bboxHt'] * df_results['bboxWt']
 
+        
         df_results = df_results.sort_values('bboxArea', ascending=True)  # Label with largest bbox height will be last
+        
+        if len(df_results)>1:
+            if abs(df_results['ymax'][0] - df_results['ymax'][1]) <=10:
+                if abs(df_results['ymin'][0] - df_results['ymin'][1]) <=10:
+                    if abs(df_results['xmin'][0] - df_results['xmin'][1]) <=10:
+                        if abs(df_results['xmax'][0] - df_results['xmax'][1]) <=10:
+                            df_results = df_results.sort_values('confidence', ascending=True)  # Label with largest bbox height will be last
         print(df_results)
         pred_list = df_results['name'].to_numpy()
         pred = 'NA'
@@ -117,7 +125,7 @@ def stitch_image():
 
 
 def load_model():
-    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/bestyy.pt', source='local')
+    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/bestyzs.pt', source='local')
     return model
 
 
