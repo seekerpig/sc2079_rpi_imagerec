@@ -30,6 +30,7 @@ def predict():
         image_bytes = image_file.read()
 
         img = Image.open(io.BytesIO(image_bytes))
+        img.save('runs')
         results = model(img, size=640)
         df_results = results.pandas().xyxy[0]
         print(df_results)
@@ -154,7 +155,7 @@ def stitch_image():
 
 
 def load_model():
-    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/bestyzs', source='local')
+    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/arrows', source='local')
     model1 = torch.hub.load('./yolov5/', 'custom', path='yolov5/best8', source='local')
     return model, model1 
 

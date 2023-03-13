@@ -31,19 +31,16 @@ def predict():
 
         img = Image.open(io.BytesIO(image_bytes))
         # Resize the image to a width of 640 pixels while preserving the aspect ratio
-        width, height = img.size
-        aspect_ratio = height / width
-        new_width = 640
-        new_height = int(new_width * aspect_ratio)
-        img = img.resize((new_width, new_height))
-        img.save('raw')
-        
+        #img_resized = img.resize((640, int(img.size[1] * 640 / img.size[0])))
+        #img.save('raw')
         results = model(img, size=640)
+        results.save('runs')
+        stitch_image()
+        
         df_results = results.pandas().xyxy[0]
         print(df_results)
 
-        results.save('runs')
-        stitch_image()
+
             
             
         df_results['bboxHt'] = df_results['ymax'] - df_results['ymin']
@@ -57,27 +54,6 @@ def predict():
             if abs(df_results['ymax'][0] - df_results['ymax'][1]) <=20 or abs(df_results['ymin'][0] - df_results['ymin'][1]) <=20 or abs(df_results['xmin'][0] - df_results['xmin'][1]) <=20 or abs(df_results['xmax'][0] - df_results['xmax'][1]) <=20:
                 print("Yes")
                 df_results = df_results.sort_values('confidence', ascending=True)  # Label with largest bbox height will be last
-        
-        if len(df_results)>=1:
-            pred1 = df_results['name'].to_numpy()
-            print(pred1)           
-            if pred1[-1] == '18' or pred1[-1] == '28':
-                results = model1(img, size=640)
-                df_results = results.pandas().xyxy[0]
-                
-                df_results['bboxHt'] = df_results['ymax'] - df_results['ymin']
-                df_results['bboxWt'] = df_results['xmax'] - df_results['xmin']
-                df_results['bboxArea'] = df_results['bboxHt'] * df_results['bboxWt']
-
-        
-                df_results = df_results.sort_values('bboxArea', ascending=True)  # Label with largest bbox height will be last
-        
-                if len(df_results)>1:
-                    if abs(df_results['ymax'][0] - df_results['ymax'][1]) <=20 or abs(df_results['ymin'][0] - df_results['ymin'][1]) <=20 or abs(df_results['xmin'][0] - df_results['xmin'][1]) <=20 or abs(df_results['xmax'][0] - df_results['xmax'][1]) <=20:
-                        print("Yes")
-                        df_results = df_results.sort_values('confidence', ascending=True)  # Label with largest bbox height will be last
-                        print("yes1") 
-            
             
         
         print(df_results)
@@ -123,16 +99,13 @@ def stitch_image():
 
 
 def load_model():
-    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/bestyzs', source='local')
-    model1 = torch.hub.load('./yolov5/', 'custom', path='yolov5/best8', source='local')
-    return model, model1 
+    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/arrows', source='local')
+    return model
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flask API exposing YOLOv5 model")
     parser.add_argument("--port", default=5005, type=int, help="port number")
     args = parser.parse_args()
-    model_tuple = load_model()
-    model = model_tuple[0]
-    model1 = model_tuple[1]
+    model = load_model()
     app.run(host="0.0.0.0", port=args.port)  # debug=True causes Restarting with stat
