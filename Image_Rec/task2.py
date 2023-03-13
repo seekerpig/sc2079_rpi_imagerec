@@ -8,6 +8,7 @@ from imutils import paths
 import os
 import time
 import cv2
+import numpy as np
 
 app = Flask(__name__)
 
@@ -29,24 +30,35 @@ def predict():
         image_bytes = image_file.read()
 
         img = Image.open(io.BytesIO(image_bytes))
-        
-        results = model(img, size=640)  # reduce size=320 for faster inference
+        # Resize the image to a width of 640 pixels while preserving the aspect ratio
+        #img_resized = img.resize((640, int(img.size[1] * 640 / img.size[0])))
+        #img.save('raw')
+        results = model(img, size=640)
         results.save('runs')
         stitch_image()
-        # return results.pandas().xyxy[0].to_json(orient="records")
+        
         df_results = results.pandas().xyxy[0]
-        df_results1 = df_results[df_results['name'] != '41']
+        print(df_results)
 
 
-        df_results1['bboxHt'] = df_results1['ymax'] - df_results1['ymin']
-        df_results1['bboxWt'] = df_results1['xmax'] - df_results1['xmin']
-        df_results1['bboxArea'] = df_results1['bboxHt'] * df_results1['bboxWt']
+            
+            
+        df_results['bboxHt'] = df_results['ymax'] - df_results['ymin']
+        df_results['bboxWt'] = df_results['xmax'] - df_results['xmin']
+        df_results['bboxArea'] = df_results['bboxHt'] * df_results['bboxWt']
 
-        df_results1 = df_results1.sort_values('bboxArea', ascending=True)  # Label with largest bbox height will be last
-        print(df_results1)
-        pred_list = df_results1['name'].to_numpy()
+        
+        df_results = df_results.sort_values('bboxArea', ascending=True)  # Label with largest bbox height will be last
+        
+        if len(df_results)>1:
+            if abs(df_results['ymax'][0] - df_results['ymax'][1]) <=20 or abs(df_results['ymin'][0] - df_results['ymin'][1]) <=20 or abs(df_results['xmin'][0] - df_results['xmin'][1]) <=20 or abs(df_results['xmax'][0] - df_results['xmax'][1]) <=20:
+                print("Yes")
+                df_results = df_results.sort_values('confidence', ascending=True)  # Label with largest bbox height will be last
+            
+        
+        print(df_results)
+        pred_list = df_results['name'].to_numpy()
         pred = 'NA'
-
 
         if pred_list.size > 0:
             for i in pred_list:
@@ -56,41 +68,13 @@ def predict():
 
         Symbol_Map_to_id = {
             "NA": 'NA',
-            "11": 11, #1
-            "12": 12, #2
-            "13": 13, #3
-            "14": 14, #4
-            "15": 15, #5
-            "16": 16, #6
-            "17": 17,
-            "18": 18,
-            "19": 19,
-            "20": 20,
-            "21": 21,
-            "22": 22,
-            "23": 23,
-            "24": 24,
-            "25": 25,
-            "26": 26,
-            "27": 27,
-            "28": 28,
-            "29": 29,
-            "30": 30,
-            "31": 31,
-            "32": 32,
-            "33": 33,
-            "34": 34,
-            "35": 35,
-            "36": 36,
-            "37": 37,
             "38": 38,
             "39": 39,
-            "40": 40,
-            "41": 41
         }
 
         image_id = Symbol_Map_to_id.get(pred, 'NA')
         result = {"image_id": image_id}
+        print(result)
 
         return jsonify(result)
 
@@ -115,7 +99,7 @@ def stitch_image():
 
 
 def load_model():
-    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/besty.pt', source='local')
+    model = torch.hub.load('./yolov5/', 'custom', path='yolov5/arrows', source='local')
     return model
 
 

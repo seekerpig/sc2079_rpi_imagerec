@@ -3,7 +3,7 @@ import socket
 
 
 IP_ADDR = "192.168.6.6"
-PORT = "5050"
+PORT = 5050
 
 
 class Algo:
@@ -67,7 +67,8 @@ class Algo:
         #receiving message
         print("")
         print("receiving message from Algo")
-        self.data = self.client_sock.recv(1024).decode("utf-8")
+        self.data = self.client_sock.recv(4096).decode("utf-8")
+        #print(self.data)
         self.data = self.data.strip()
         #print("received data from algo: ", self.data)
 
