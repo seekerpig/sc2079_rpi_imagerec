@@ -411,14 +411,14 @@ class MultiProcess:
         # travel around obstacle until image detected (non bulleye)
 
         
-        hardcoded_path = [
-            "SNAP",
-            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
-            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
-            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
-            "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
-            "FIN"
-        ]
+        # hardcoded_path = [
+        #     "SNAP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
+        #     "FR00", "FL00", "FW30", "BR00", "FW10", "SNAP",
+        #     "FIN"
+        # ]
         hardcoded_path = ["SNAP"]   
         # hardcoded_path = [
         #     "DT20", "SNAP", "NOOP",
