@@ -2,38 +2,6 @@
 Github repository for SC2079 RPI and Image Rec - Group 06
 
 
-
-# Standards/protocols for the message that will be transmitted across teams:
-
-| is the message seperator
-In general, a message will have a header aka what the message is for (TYPE) and some content.
-A message will look like "TYPE|XXXXXX" - XXXX means the content,
-————————————————————————————
-@Android team, this is how the message should look like when you send to us:
-"TASK1|[{'x':6,'y':2,'d':4}, {'x':4,'y':2,'d':0}, {'x':5,'y':2,'d':2}]" 
-this message is for task 1 image rec, the header is TASK1, content is a list of dictionary with the coordinates and direction of obstacle.  @Algo team, this is the message you will receive also, so you will need to be able to interpret the message also.
-
-"MANUAL|FR00" - this message is for the single manual movements for when you want to remote control the robot
-
-————————————————————————————
-@Algo team, when you finish processing the message with obstacles from Android, you're expecting to send us this message:
-"TASK1|['FW10', 'FR00', 'FW70', 'BR00', 'BW20', 'SNAP', 'FW20', 'FIN']|[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2. 's':0}, {'x':5,'y':2,'d':2, 's':1}]"
-Header is TASK1, then | seperator, then first part of the message is a list of commands, then another | seperator, second part of message is the a list of  states where the robot should be when going through task 1, s represents screenshot if s:1, then robot will take screenshot there. 
-
-@Android team, when we receive this message from algo, we will be sending you the part "[{'x':1,'y':1,'d':0, 's':0}, {'x':4,'y':2,'d':2, 's':0}, {'x':5,'y':2,'d':2, 's':1}]" of the message which is the locations of the robot, so you will need to setup to receive and interpret the message also. The way your simulator should work is, when you receive this message, you just continue waiting for more messages, when you receive a "NEXT" string from us, then you can assume the first location of the robot in the list is reached, and move your simulator robot as accordingly to the correct location.
-
-If you receive a "FAIL" from us, assume there was some error and just show an error message.
-
-
-
-————————————————————————————
-@STM team, the message you will receive from us for task 1 is single messages e.g.
-"FW10"
-"FR00"
-When you receive this message, you need to complete the given movement, once the movement is completed, then you need to send us an acknowledge message. Just send us "ACK" as a string.
-
-————————————————————————————
-
 # RPI:
 ## Multithreading:
 Processes/Threads:
@@ -81,7 +49,7 @@ below are only for task 1 image rec, task 2 movement that include sensors etc ar
 2. Algo to Android (paths? like coordinates of robot so algo can simulate the run)
 
 
-## Functions for Algo.py (via socket?)
+## Functions for Algo.py (via socket)
 1. __init__
 2. connect
 3. disconnect
@@ -95,7 +63,7 @@ below are only for task 1 image rec, task 2 movement that include sensors etc ar
 
 
 
-## Functions for STM32.py (via UART)
+## Functions for STM32.py (via UART/serial)
 1. __init__
 2. connect
 3. disconnect
