@@ -1,11 +1,7 @@
 
 
 #testing STM32
-#THIS IS TASK 1
-#from multiprocess_TESTINGSTM32 import MultiProcess
-
-#for task 2
-from multiprocess_TASK2 import MultiProcess
+from multiprocess_TESTINGSTM32 import MultiProcess
 
 #testing android code
 #from testingAndroid import MultiProcess

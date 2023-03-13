@@ -21,7 +21,6 @@ class MultiProcess:
         #initialising the modes path = 1
         self.mode = 0 
         self.count = 1
-        self.task1Queue = Queue()
         #initialising all the classes first
         self.Android = Android()
         self.STM32 = STM32()
@@ -128,25 +127,9 @@ class MultiProcess:
                             self.unpause.set()
                         else:
                             print("Message is from android for MANUAL is not complete, hence not processed.")
-                    elif (rawMessage.startswith("START")):
-
-                        message = self.task1Queue.get_nowait()
-                        print("algotask1msg is",message)
-                        messageList = message.split(Protocol.MSG_SEPARATOR)
-
-                        if (len(messageList) == 3):
-                        
-                            #Sending the message from the list individually to the queue
-                            #example, FW10 , FW00 etc... 
-                            message_list = ast.literal_eval(messageList[1])
-                            for item in message_list:
-                                self.toSTMQueue.put_nowait(item)
-
-                            #Sending the Robot coordinates to Android
-                            #if self.mode == 1: 
-                            self.toAndroidQueue.put_nowait("PATHS|" + messageList[2])
-                            print("message okay 123")
-                            self.unpause.set()
+                    elif (rawMessage.startswith("A5TASK")):
+                        self.unpause.set()
+                        self.navigateSingleObstacle()
                     else:
                         print("Raw message is not recognised from Android")
 
@@ -163,7 +146,6 @@ class MultiProcess:
             try:
                 if not self.toAndroidQueue.empty():
                     message = self.toAndroidQueue.get_nowait()
-                    print("Sending this message to Android, ", message)
                     self.Android.send(message)
                 
             except Exception as error:
@@ -189,10 +171,21 @@ class MultiProcess:
 
                     if rawMessage.startswith(Protocol.Algo.TASK1): 
                         print("mesage from algo is: ", rawMessage)
+                        messageList = rawMessage.split(Protocol.MSG_SEPARATOR)
+
+                        if (len(messageList) == 3):
                         
-                        self.task1Queue.put_nowait(rawMessage)
-                        self.toAndroidQueue.put_nowait("Ready")
-                        
+                            #Sending the message from the list individually to the queue
+                            #example, FW10 , FW00 etc... 
+                            message_list = ast.literal_eval(messageList[1])
+                            for item in message_list:
+                                self.toSTMQueue.put_nowait(item)
+
+                            #Sending the Robot coordinates to Android
+                            #if self.mode == 1: 
+                            self.toAndroidQueue.put_nowait("PATHS|" + messageList[2])
+                            print("message okay 123")
+                            self.unpause.set()
 
                 
             except Exception as error:

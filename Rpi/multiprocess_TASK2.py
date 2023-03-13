@@ -21,7 +21,7 @@ class MultiProcess:
         #initialising the modes path = 1
         self.mode = 0 
         self.count = 1
-        self.task2Count = 0
+        self.task2Count = Value('i', 0)
         #initialising all the classes first
         self.Android = Android()
         self.STM32 = STM32()
@@ -234,7 +234,10 @@ class MultiProcess:
                     # if self.mode==1: 
                     #    self.toAndroidQueue.put_nowait("NEXT") 
 
-     
+                elif raw_message.startswith("FAIL"):
+                    self.movement_lock.release()
+                    self.toAndroidQueue.put_nowait("FAIL")
+                    print("Error detected , Movement lock releasing . . .")
                 
                 # Take_Picture|left. to determine which lane is the robot at
                 elif raw_message.startswith("Take_Picture"):
@@ -270,9 +273,35 @@ class MultiProcess:
                     self.movement_lock.acquire()
 
                     print("message sent to stm", message)
+                    # Instructions for STM if the message is part of movements
+                      # Completed the run  
+                    if message == "FIN":
+                        self.unpause.clear()
+                        self.movement_lock.release()
+                        print("Instruction Completed!") 
+
+                    # Command for taking picture
+                    elif message.startswith("SNAP"): 
+                        
+                        self.toImageQueue.put_nowait(message)
                     
-                    if any(message.startswith(v) for v in Protocol.Movements.__dict__.values()):
-                        #time.sleep(0.2)
+                    #Start TASK2, first movement forward to obstacle
+                    elif message.startswith("Forward_to_obs"):
+                        self.STM32.send(message)
+                    
+                    #image pointing to left
+                    elif message.startswith("L_Picture_taken"):
+                        self.STM32.send("Swerve_left")
+                    
+                    #image pointing to right
+                    elif message.startswith("R_Picture_taken"):
+                        self.STM32.send("Swerve_right")
+                    
+                    #todo 
+                    #set up a bigger turn ?
+                    #Check if message start with the movement command
+                    elif any(message.startswith(v) for v in Protocol.Movements.__dict__.values()):
+                        time.sleep(0.2)
                         self.STM32.send(message) 
                    
                     # Completed the run  
@@ -296,46 +325,33 @@ class MultiProcess:
                     #self.Algo.send(message)
                     print("")
                     print("Message being sent to Image Rec...")
-                    #print("Message is: ", message)
-                    #count = message[-1]
-                    result = None
+                    print("Message is: ", message)
+                    count = message[-1]
+                    
                     result = camera.snap_and_detect()
-                    #result['image_id'] = 38
                     print("Result from image rec to rpi is: ", result)
                     
                     
                     #self.toAndroidQueue.put_nowait("IMAGEID|COUNT|RESULT")
-                    #self.toAndroidQueue.put_nowait("IMAGEID|"+str(result['image_id']))
+                    self.toAndroidQueue.put_nowait("IMAGEID|"+str(count)+'|'+str(result['image_id']))
                     #self.toAndroidQueue.put_nowait("NEXT")
                     #self.count +=1
-                    #self.movement_lock.release()
+                    self.movement_lock.release()
                     if result != None:
-                        #print("Testing")
-                        #print(result['image_id'])
-                        if(result['image_id'] == 38):
-                            #print("38")
+                        if(str(result['image_id']) == '38'):
                             #right arrow
                             if(self.task2Count == 0):
-                                print("FR00")
                                 self.toSTMQueue.put_nowait("FR00")
                                 self.task2Count = 1
                             elif(self.task2Count == 1):
-                                print("BR00")
-                                
                                 self.toSTMQueue.put_nowait("BR00")
-                        elif(result['image_id'] == 39):
-                            #print("39")
+                        elif(str(result['image_id']) == '39'):
                             #left arrow
                             if(self.task2Count == 0):
-                                print("FL00")
                                 self.toSTMQueue.put_nowait("FL00")
                                 self.task2Count = 1
                             elif(self.task2Count == 1):
-                                print("BL00")
-                                self.toSTMQueue.put_nowait("BL00")
-                                
-                        else:
-                            print("do nothing image id not 38 or 39")
+                                self.toSTMQueue.put_nowait("BL0")
     
 
                     #release lock so we can send new commands to STM32.
