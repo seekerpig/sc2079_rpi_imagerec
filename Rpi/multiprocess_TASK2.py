@@ -115,7 +115,8 @@ class MultiProcess:
 
                     elif rawMessage.startswith(Protocol.Android.TASK2):
                         #TODO task 2 for the project
-                        self.toSTMQueue.put_nowait("FW10")
+                        self.task2Count=0
+                        self.toImageQueue.put_nowait("FW10")
                         self.unpause.set()
 
                     elif rawMessage.startswith(Protocol.Android.MANUAL):
@@ -309,6 +310,13 @@ class MultiProcess:
                     #self.toAndroidQueue.put_nowait("NEXT")
                     #self.count +=1
                     #self.movement_lock.release()
+                    if result['image_id'] == 'NA' and self.task2Count==0:
+                        print("FW20")
+                        self.toSTMQueue.put_nowait("FW10")
+                    elif result['image_id'] == 'NA' and self.task2Count==1:
+                        print("BW10")
+                        self.toSTMQueue.put_nowait("FW20")
+                        
                     if result != None:
                         #print("Testing")
                         #print(result['image_id'])
