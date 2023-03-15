@@ -56,6 +56,13 @@ def predict():
                 df_results = df_results.sort_values('confidence', ascending=True)  # Label with largest bbox height will be last
             
         
+        pred4 = df_results['confidence'].to_numpy()
+        print(pred4) 
+        if pred4[-1] < 0.8:
+            image_id = 'NA'
+            result = {"image_id": image_id}
+            return jsonify(result)
+            
         print(df_results)
         pred_list = df_results['name'].to_numpy()
         pred = 'NA'
