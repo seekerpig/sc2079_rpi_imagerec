@@ -39,40 +39,39 @@ def predict():
 
         # Create the raw folder if it doesn't exist
         os.makedirs('raw', exist_ok=True)
-
         # Use the timestamp in the file name to save the raw image in the raw folder
         img.save(f'raw/raw_{timestamp}.jpg')
 
+
         results = model(img, size=640)
-        results.save('runs')
-        stitch_image()
         
         df_results = results.pandas().xyxy[0]
         print(df_results)
-
-
             
             
         df_results['bboxHt'] = df_results['ymax'] - df_results['ymin']
         df_results['bboxWt'] = df_results['xmax'] - df_results['xmin']
         df_results['bboxArea'] = df_results['bboxHt'] * df_results['bboxWt']
-
-        
         df_results = df_results.sort_values('bboxArea', ascending=True)  # Label with largest bbox height will be last
         
         if len(df_results)>1:
-            if abs(df_results['ymax'][0] - df_results['ymax'][1]) <=20 or abs(df_results['ymin'][0] - df_results['ymin'][1]) <=20 or abs(df_results['xmin'][0] - df_results['xmin'][1]) <=20 or abs(df_results['xmax'][0] - df_results['xmax'][1]) <=20:
-                print("Yes")
-                df_results = df_results.sort_values('confidence', ascending=True)  # Label with largest bbox height will be last
-            
+            image_id = 'NA'
+            result = {"image_id": image_id}
+            return jsonify(result)
         
-        #pred4 = df_results['confidence'].to_numpy()
-        #print(pred4) 
-        #if pred4[-1] < 0.8:
-        #    image_id = 'NA'
-        #    result = {"image_id": image_id}
-        #    return jsonify(result)
-            
+        print(df_results)
+        
+        
+        pred4 = df_results['confidence'].to_numpy()
+        print(pred4) 
+        if len(df_results)==0 or pred4[-1] < 0.5:
+            image_id = 'NA'
+            result = {"image_id": image_id}
+            return jsonify(result)
+    
+        results.save('runs')
+        stitch_image()
+        
         print(df_results)
         pred_list = df_results['name'].to_numpy()
         pred = 'NA'
@@ -101,9 +100,6 @@ def stitch_image():
     newPath = 'uploads/stitched.jpg'
     imgPath = list(paths.list_images(imgFolder))
     images = [Image.open(x) for x in imgPath]
-    # Filter images with label "Bullseye"
-    #filtered_images = [img for img in images if "41" not in img]
-    #width, height = zip(*(i.size for i in images))
     width, height = zip(*(img.size for img in images))
     total_width = sum(width)
     max_height = max(height)
